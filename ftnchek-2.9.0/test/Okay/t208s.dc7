@@ -1,0 +1,8 @@
+*====>Begin Module %MAIN      File t208s.f        All variables
+*
+*     Parameter variables
+*
+      CHARACTER*(*)       S
+      PARAMETER           (S = 'hello')
+*
+*====>End Module   %MAIN      File t208s.f     

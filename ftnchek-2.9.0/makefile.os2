@@ -1,0 +1,563 @@
+#=======================================================================
+# UNIX version of Makefile for Fortran program checker
+#
+#  WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!
+#     This makefile is no longer being maintained.  To customize
+#     for your system, edit Makefile.in instead, and run configure.
+#     This makefile is here only for convenience in case configure
+#     gives trouble or cannot be used.  This makefile works
+#     for ftnchek v2.9, but will not be updated for later versions.
+#
+# Current target list:
+#	TAGS
+#	all			build ftnchek and its documentation files
+#	blurb.txt
+#	check			run validation test suite
+#	clean			remove unnecessary intermediate files
+#	clobber			make clean, and remove ftnchek executable
+#	dcl2inc.doc		ASCII form of documentation
+#	dcl2inc.ps		PostScript form of documentation
+#	distclean		remove everything that can be rebuilt
+#	docs			documentation files
+#	fortran.c		translate yacc code to C
+#	ftnchek			ftnchek executable program
+#	ftnchek.1		UNIX manual page document
+#	ftnchek.doc		ASCII form of documentation
+#	ftnchek.hlp		VAX/VMS HELP library source
+#	ftnchek.ps		PostScript form of documentation
+#	install			install ftnchek and dcl2inc and their man pages
+#	install-exe		install ftnchek and dcl2inc executables
+#	install-man		install only man pages
+#	install-man-sgi		install only man pages on SGI systems
+#	lint			run lint on source code
+#	mostlyclean		same as clean
+#	prog			same as ftnchek
+#	realclean		same as clobber
+#	spotless		make distclean, then remove formatted
+#				documentation (do NOT do this if you don't
+#				have groff or nroff/troff to recreate the
+#				documentation!)
+#	TAGS			emacs editor tags file
+#	tags			ex and vi editor tags file
+#	uninstall		undo an ftnchek installation
+#
+# Object file targets:
+#	ftnchek.o
+#	exprtype.o
+#	forlex.o
+#	fortran.o
+#	pgsymtab.o
+#	plsymtab.o
+#	project.o
+#	symtab.o
+#
+# Machine-specific convenience targets:
+#	DEC-ALPHA		DEC Alpha OSF/1 and OpenVMS
+#	DJGPP			IBM PC/DOS djgpp compiler
+#	GENERIC			most UNIX systems
+#	HP			HP 9000/7xx HP-UX 9.x
+#	IBM-RS6000		IBM RS/6000-xxx AIX 3.2
+#	LINUX			Linux on 386
+#	LINUX-486		Linux on 486 and up
+#	MIPS-MIPS		MIPS RC6280 RISCos 2.1.1
+#       OS2emx                  IBM OS/2 2.x, w. gcc/emx and emx.dll
+#       OS2noemx                IBM OS/2 2.x, w. gcc/emx, doesn't need emx.dll
+#	SGI			Silicon Graphics IRIX 4.x and 5.x
+#	SGI-INSTALL		SGI special install for man page
+#	SOLARIS2.x		Sun Solaris 2.x
+#	SOLARIS2.x-gcc		Sun Solaris 2.x with GNU gcc
+#	SOLARIS2.x-apcc		Sun Solaris 2.x with Apogee apcc
+#	STARDENT		Stardent 15xx OS 2.2
+#	SUNOS5.x		Sun SunOS 5.x (same as Solaris 2.x)
+#	SUNOS5.x-gcc		Sun SunOS 5.x (same as Solaris 2.x) with
+#				GNU gcc
+#	SUNOS5.x-apcc		Sun SunOS 5.x (same as Solaris 2.x)
+#				with Apogee apcc
+#	SUNOS4.0		Sun SunOS 4.0
+#	SUNOS4.1		Sun SunOS 4.1
+#	ULTRIX-MIPS		DECstation ULTRIX 4.x
+#	UNIX			most UNIX systems
+#
+# For each of these machine-specific targets, you can modify what is
+# built by defining a value for TARGETS on the make command line
+# (default: ftnchek).
+#
+#
+#    Copyright (C) 1991 by Robert K. Moniot.
+#    This program is free software.  Permission is granted to
+#    modify it and/or redistribute it, retaining this notice.
+#    No guarantees accompany this software.
+#
+# Acknowledgements and thanks to Nelson H. F. Beebe of the University
+# of Utah for improvements to this Makefile.
+# [25-Apr-1994]
+#=======================================================================
+
+# These definitions should be customized for your local conventions
+# if you want to do "make install" or "make uninstall"
+BINDIR          = /usr/local/bin
+LIBDIR		= /usr/local/lib/ftnchek
+MANDIR          = /usr/local/man
+#NROFF		= groff # if you have groff, but not nroff
+NROFF		= nroff
+#STRIP           = echo >/dev/null # if your system lacks strip
+STRIP           = strip
+# The following is only used for targets ftnchek.doc and ftnchek.hlp
+# which are not needed for unix platforms.  It removes control chars
+# and converts tabs to blanks.
+#COL		= /usr/5bin/col -bx	# For BSD-like systems
+COL		= col -bx		# For System V-like systems
+
+# Editor tags file support
+CTAGS		= ctags
+CTAGSFLAGS	= -t
+ETAGS		= etags
+
+# For "make check", we need new awk, either AT&T nawk or GNU gawk.
+# However, IBM RS/6000 AIX calls it awk.
+#NAWK		= awk
+#NAWK		= gawk
+NAWK		= nawk
+
+# These system utilities should be standard on all UNIX systems
+# BINPATH is the path for the following binaries, in case
+# they are installed on a non-UNIX system like OS/2 from the
+# GNU {file,text,shell} utilities. For UNIX, BINPATH should be /bin/
+# (with the trailing slash!), on systems where all the commands are
+# in the path, it can be empty.
+#
+BINPATH	= /bin/
+# BINPATH		=
+CHMOD		= $(BINPATH)chmod
+CP              = $(BINPATH)cp
+MKDIR		= $(BINPATH)mkdir
+# MV              = $(BINPATH)mv
+MV              = mv
+RM              = $(BINPATH)rm -f
+RMDIR		= $(BINPATH)rmdir
+SED		= $(BINPATH)sed
+#
+# On OS/2, for some reason under GNU Make the SHELL must be commented out
+# here. This may be specific to the tcsh and sh ports I use, however.
+# SHELL		= 
+# SHELL		= $(BINPATH)sh
+TR		= /usr/ucb/tr
+
+FTNCHEK		= ./ftnchek
+MAN2PS		= ./man2ps
+
+# YACC          =parser name, YSTEM=stem on tab.c, tab.h
+# for yacc as the parser
+YACC            = yacc
+YSTEM           = y
+
+# for GNU bison as the parser
+#YACC           = bison
+#YSTEM          = fortran
+
+# OPTIONS is used to define various characteristics.  Most commonly
+# needed ones are given below; uncomment whichever you like.
+# See ftnchek.h for others, with their defaults and explanations.
+
+#  To use the defaults for everything uncomment this:
+OPTIONS         =
+
+#  To make all table sizes 10x bigger than defaults uncomment this:
+#OPTIONS        = -DLARGE_MACHINE
+
+#  To allow the -vcg option uncomment this:
+#OPTIONS	= -DVCG_SUPPORT
+
+#  To prohibit underscores in variable names, inline comments
+#   starting with '!',  the DO ... ENDDO loop forms and INCLUDE statements:
+#OPTIONS        = -DSTRICT_SYNTAX
+
+# CFLAGS is used to define the operating system and options
+# Other
+CFLAGS          = -DUNIX $(OPTIONS) -O -D_BSD
+LDFLAGS         =
+YFLAGS          = -d
+
+
+# Object extension. By default this is .o, but can be set to .obj (or
+# whatever). This is used for the symbolic target OS2noemx, and should
+# be useful for VMS, or non-gcc C compilers on OS/2. This works for
+# the UNIX targets as well.
+
+OBJ             = .o
+
+# Here is another way which relies on GNU make (often installed as gmake).
+# Maybe some other make utilities can handle that construct, too.
+# On some systems, make _is_ GNU make, on some it is gmake.
+# You may uncomment it in case you have GNU make:
+# ifeq ($(OBJ),)
+#   OBJ             = .o
+# endif
+#
+# It checks whether an OBJ extension has been defined explicitly (by a
+# symbolic target or an entry above), in which case it doesn't change it.
+# If no OBJ extension has been defined it defaults to .o.
+
+# implicit rule to allow for different extensions of object files (VAX,
+# OS/2 linking with link386.exe, etc.)
+%$(OBJ):
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) $*.c -o $@
+
+# fortran.o first because of possible remake if tokdefs.h changes (see below)
+OBJS            = fortran$(OBJ) exprtype$(OBJ) forlex$(OBJ) ftnchek$(OBJ) \
+		  pgsymtab$(OBJ) plsymtab$(OBJ) project$(OBJ) symtab$(OBJ)
+
+SRCS            = exprtype.c forlex.c fortran.c ftnchek.c \
+		  ftnchek.h intrins.h iokeywds.h keywords.h newarge.c \
+		  newargh.c newcome.c newcomh.c pgsymtab.c plsymtab.c \
+		  project.c shell_mung.c symtab.c symtab.h tokdefs.h \
+		  y.tab.h
+
+# executable file extension. Needed, e.g. when linking under OS/2 with
+# link386.exe, as done with the symbolic target 'OS2noemx'.
+# The symbolic target 'OS2emx' calls emxbind which explicitly makes an
+# executable file from the 'a.out' type result.
+# The default extension for EXE is empty, on OS/2 it is .exe, given in
+# the sybolic targets explicitly.
+EXE =
+# EXE	= .exe
+
+#=======================================================================
+
+prog:	$(FTNCHEK)
+
+all:	prog docs
+
+check:
+	cd test; $(MAKE) NAWK="$(NAWK)" -i -s check
+
+lint:
+	lint $(LINTFLAGS) $(OBJS:$(OBJ)=.c) -lm
+
+# Remove intermediate files that are not required after the program is
+# built.
+clean mostlyclean:
+	-$(RM) *$(OBJ)
+	-$(RM) \#*
+	-$(RM) a.out
+	-$(RM) *~
+	-$(RM) core
+
+# Remove almost everything that make can rebuild
+clobber realclean:	clean
+	-$(RM) fortran.c
+	-$(RM) ftnchek$(EXE)
+
+# dcl2inc.doc is ascii text form of documentation.  It should not matter
+# whether dcl2inc.1 or dcl2inc.man is used here.
+dcl2inc.doc:	dcl2inc.man
+	$(NROFF) -man dcl2inc.man | $(COL) >dcl2inc.doc
+
+dcl2inc.ps:	dcl2inc.man
+	$(MAN2PS) <dcl2inc.man >dcl2inc.ps
+
+# Remove everything that make can rebuild, preparatory to making a
+# distribution version.  We intentionally do NOT remove .ps and .doc
+# files, because some UNIX systems lack nroff/troff/groff.
+distclean:	realclean
+	-$(RM) *.dcl
+	-$(RM) cscope.out
+	-$(RM) tags
+	-$(RM) TAGS
+	-$(RM) ftnchek.1
+
+docs:	blurb.txt dcl2inc.doc dcl2inc.ps ftnchek.doc \
+	ftnchek.hlp ftnchek.ps
+
+$(FTNCHEK): $(OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(FTNCHEK)$(EXE) $(OBJS) -lm
+
+# Documentation targets: If you make changes to the documentation,
+# you should edit only ftnchek.man and then re-make these targets.
+# If ftnchek.1 fails to make, ftnchek.man is usable directly except
+# that some troff-like processors may not give satisfactory results.
+#
+# Following sed script trims out the if-else machinery contained in
+# ftnchek.man to produce a clean nroff document.  The lines of the
+# script correspond to the following actions:
+#	1. remove text between lines of form ``.if \nh \{'' or .ie \nh \{''
+#	   and lines of form ``\}'' (these are the help-related additions)
+#	2. remove lines of form ``.if !\nh \{''  (these preface man text)
+#	   Also remove ``.if !\nb \{'' which are for blurb.
+#	3. remove lines of form ``.el \{''  (start of the else sections of
+#	   the .if's of step 1)
+#	4. remove lines of form ``\}'' (closures of step 3 lines)
+#	5. remove lines of form ``.ie \nh text'' (one-liner help text)
+#	6. change lines of form ``.el \nh text'' to ``text'' (these are
+#	   one-liner man text)
+#	7. change lines of form ``.if !\nh text'' to ``text'' (ditto)
+ftnchek.1:	ftnchek.man
+	$(SED) -e '/^\.i[fe] \\nh \\{/,/^\\}$$/d' \
+	    -e '/^\.if !\\n[bh] \\{/d' \
+	    -e '/^\.el \\{/d' \
+	    -e '/^\\}/d' \
+	    -e '/^\.i[fe] \\nh /d' \
+	    -e 's/^\.el *\(.*\)$$/\1/' \
+	    -e 's/^\.if !\\nh *\(.*\)$$/\1/' \
+		 < ftnchek.man > ftnchek.1
+
+# ftnchek.doc is ascii text form of documentation.  It should not matter
+# whether ftnchek.1 or ftnchek.man is used here.
+ftnchek.doc:	ftnchek.man
+	$(NROFF) -man ftnchek.man | $(COL) >ftnchek.doc
+
+# ftnchek.ps is PostScript form of documentation.
+ftnchek.ps:	ftnchek.man
+	@make ftnchek.1
+	$(MAN2PS) <ftnchek.1 >ftnchek.ps
+
+# blurb.txt is an ascii file for informational mailings.
+blurb.txt:	ftnchek.man
+	$(NROFF) -man -rb1 ftnchek.man | $(COL) >blurb.txt
+
+# ftnchek.hlp is a VMS HELP library source document:
+# create ftnchek.hlb with $ LIBR/CREATE/HELP FTNCHEK.HLB FTNCHEK.HLP
+# The leading and trailing newlines in ftnchek.hlp should be removed.
+ftnchek.hlp:	ftnchek.man
+	$(SED) -e '1d' ftnchek.man | \
+	$(NROFF) -man -rh1 | $(COL) | \
+	$(SED) -e 's/^-\([a-zA-Z][a-zA-Z]*\)/\/\1/' \
+	    -e 's/\([^a-zA-Z]\)-\([a-zA-Z][a-zA-Z]*\)/\1\/\2/g' \
+	>ftnchek.hlp
+
+#
+# N.B. tokdefs.h is copy of y.tab.h used to avoid remaking stuff when
+# grammar changes but not tokens.
+# The following copies y.tab.h to tokdefs.h if changed, then aborts make,
+# since dependencies may have changed.
+fortran.c: fortran.y
+	$(YACC) $(YFLAGS) fortran.y
+	$(MV) $(YSTEM).tab.c fortran.c
+	@if cmp -s $(YSTEM).tab.h tokdefs.h ; then true ; else \
+		echo; echo tokdefs.h changed -- repeat make ; \
+		$(CP) $(YSTEM).tab.h tokdefs.h; \
+		false ; \
+	fi
+
+# Install program and documentation on system.  Obsolete fcl2vcg script
+# & doc is removed if present.
+install:	install-exe install-man
+
+install-exe:	ftnchek
+	$(CP) ftnchek $(BINDIR)
+	-$(STRIP) $(BINDIR)/ftnchek
+	$(CHMOD) 755 $(BINDIR)/ftnchek
+	-$(MKDIR) $(LIBDIR)
+	$(CP) dcl2inc.awk $(LIBDIR)/dcl2inc.awk
+	$(CHMOD) 644 $(LIBDIR)/dcl2inc.awk
+	$(SED) -e 's@^LIBDIR=.*$$@LIBDIR=$(LIBDIR)@' -e 's/nawk/$(NAWK)/' \
+		<dcl2inc.sh >$(BINDIR)/dcl2inc
+	$(CHMOD) 755 $(BINDIR)/dcl2inc
+	-$(RM) $(BINDIR)/fcl2vcg
+
+
+# Install man pages, taking care to remove old formatted ones, because
+# many man implentations fail to compare time stamps of raw and
+# formatted files, and will show out-of-date formatted files.
+install-man: ftnchek.1
+	$(CP) dcl2inc.man $(MANDIR)/man1/dcl2inc.1
+	-$(RM) $(MANDIR)/cat1/dcl2inc.1
+	$(CHMOD) 644 $(MANDIR)/man1/dcl2inc.1
+	$(CP) ftnchek.1 $(MANDIR)/man1/ftnchek.1
+	-$(RM) $(MANDIR)/cat1/ftnchek.1
+	$(CHMOD) 644 $(MANDIR)/man1/ftnchek.1
+	-$(RM) $(MANDIR)/man1/fcl2vcg.1
+	-$(RM) $(MANDIR)/cat1/fcl2vcg.1
+
+# Remove everything that the install target installed.
+uninstall:
+	-$(RM) $(BINDIR)/dcl2inc
+	-$(RM) $(BINDIR)/ftnchek
+	-$(RM) $(LIBDIR)/dcl2inc.awk
+	-$(RM) $(MANDIR)/cat1/dcl2inc.1
+	-$(RM) $(MANDIR)/cat1/ftnchek.1
+	-$(RM) $(MANDIR)/ftnchek.z	# SGI
+	-$(RM) $(MANDIR)/man1/dcl2inc.1
+	-$(RM) $(MANDIR)/man1/ftnchek.1
+	-$(RMDIR) $(LIBDIR)
+
+# WARNING: do NOT execute this target, unless you have nroff/troff or groff
+# to recreate the formatted documentation files.
+spotless:	distclean
+	$(RM) blurb.txt
+	$(RM) dcl2inc.doc
+	$(RM) dcl2inc.ps
+	$(RM) ftnchek.doc
+	$(RM) ftnchek.hlp
+	$(RM) ftnchek.ps
+
+# ex and vi editor tags file
+tags:	$(SRCS)
+	$(CTAGS) $(CTAGSFLAGS) *.[ch]
+
+# emacs editor tags file
+TAGS:	$(SRCS)
+	$(ETAGS) *.[ch]
+
+#=======================================================================
+# Object file dependencies on include files
+
+ftnchek$(OBJ):	ftnchek.h
+
+exprtype$(OBJ):	ftnchek.h symtab.h tokdefs.h
+
+forlex$(OBJ):	ftnchek.h keywords.h symtab.h tokdefs.h
+
+fortran$(OBJ):	ftnchek.h symtab.h fortran.c
+
+pgsymtab$(OBJ):	ftnchek.h symtab.h
+
+plsymtab$(OBJ):	ftnchek.h symtab.h
+
+project$(OBJ):	ftnchek.h symtab.h
+
+symtab$(OBJ):	ftnchek.h iokeywds.h intrins.h symtab.h tokdefs.h
+
+#=======================================================================
+# Machine specific targets to build ftnchek with suitable compile options.
+# Use 'MAKE_OPTIONS= "YACC=/usr/local/gnu/bin/bison" "YSTEM=fortran"'
+# to select GNU bison parser, if you have touched fortran.y.
+
+TARGETS		= ftnchek
+
+# On DEC Alpha systems, compilers default to fast non-IEEE-754-conformant
+# arithmetic that is incapable of handling denormalized numbers,
+# Infinity, and NaN.  ftnchek can die on at least test/complex.f if IEEE
+# 754 behavior is not restored with -ieee_with_inexact.  The -Olimit
+# value increases the optimizer table sizes.
+
+DEC-ALPHA:
+	$(MAKE) "CFLAGS= -DUNIX -DLARGE_MACHINE $(OPTIONS) -O -D_BSD" \
+		"CC = c89 -ieee_with_inexact -Olimit 1000" $(MAKE_OPTIONS) \
+		$(TARGETS)
+
+# target for djgpp on IBM PC by Judah Milgram, U. Maryand College Park
+DJGPP:
+	$(MAKE) 'CFLAGS= $(OPTIONS) -DLARGE_MACHINE -O' \
+	$(MAKE_OPTIONS) $(TARGETS)
+	coff2exe ftnchek
+	del ftnchek
+
+GENERIC LINUX STARDENT UNIX:
+	$(MAKE) "CFLAGS= -DUNIX -DLARGE_MACHINE $(OPTIONS) -O -D_BSD" \
+		$(MAKE_OPTIONS) $(TARGETS)
+
+# Add compiler flag to eliminate optimizer table overflow
+HP:
+	$(MAKE) "CFLAGS= -DUNIX -DLARGE_MACHINE $(OPTIONS) -O -D_BSD +Obb700" \
+		$(MAKE_OPTIONS) $(TARGETS)
+
+IBM-RS6000:
+	$(MAKE) "CFLAGS= -DUNIX -DLARGE_MACHINE $(OPTIONS) \
+		-DAIXC -DRAND_NO_ARG -O -D_BSD" \
+		"CC = c89 -D_POSIX_SOURCE" $(MAKE_OPTIONS) \
+		$(TARGETS)
+
+LINUX-486:
+	$(MAKE) "CFLAGS= -DUNIX -DLARGE_MACHINE $(OPTIONS) -O -D_BSD -m486" \
+		$(MAKE_OPTIONS) $(TARGETS)
+
+# MIPS RC6280 (and other models) RISCos 2.1.1AC (and EP/IX)
+MIPS-MIPS:
+	$(MAKE) "CFLAGS= -DUNIX $(OPTIONS) -DLARGE_MACHINE -O -D_BSD -Olimit 1000 -systype bsd43" \
+		$(MAKE_OPTIONS) $(TARGETS)
+
+# Under some shells, the SHELL variable declared above must be commented
+# out for this to work properly with certain make ports to OS/2:
+# Target for IBM OS/2 2.x and later, using gcc / emx, by Stefan A. Deutscher
+# sad@utk.edu. The options to emxbind can all be ommited here, they are
+# for emx09b. The executable built here requires emx.dll (version 09b,
+# emxfix03 or later) to be in the LIBPATH. This helps reduce the memory
+# footprint and is recommended in case other emx/gcc compiled programmes
+# are being used anyway.
+
+OS2emx:
+	$(MAKE) 'CFLAGS= -DUNIX -DLARGE_MACHINE -O -s -D_BSD'\
+	'CC = gcc' 'LDFLAGS = -s' 'OBJ = .o' 'EXE = .exe' \
+	$(MAKE_OPTIONS) $(TARGETS)
+
+#       echo $(FTNCHEK) created.  Building now $(FTNCHEK).exe:
+#       emxbind -bs -w $(FTNCHEK)
+#       rm $(FTNCHEK)
+#       echo $(FTNCHEK).exe created.
+
+# Target for IBM OS/2 2.x and later, using gcc / emx, by Stefan A. Deutscher
+# sad@utk.edu. The options to emxbind can all be ommited here, they are
+# for emx09b. This target requires the IBM Linker link386.exe to be installed
+# in the system (selective install). The executable built here does not
+# need any dynamic link libraries from the emx distribution and can run
+# as a standalone programme, hence it is moved here to ftnchekS.exe.
+
+OS2noemx:
+	$(MAKE) 'CFLAGS= -DUNIX -DLARGE_MACHINE -O -s -Zomf -Zsys -D_BSD'\
+	'CC = gcc' \
+	'LDFLAGS = -s -Zstack 64 $(FTNCHEK).def' \
+	'OBJ = .obj' 'EXE = .exe' \
+	$(MAKE_OPTIONS) $(TARGETS)
+	mv $(FTNCHEK).exe $(FTNCHEK)S.exe
+
+
+# SGI target improved by Mark Hanning-Lee of JPL.  Use -O2 for full
+# optimization.  4.0.x users can even use -O3, but 5.2 complains about
+# using -O3 with the -c option.
+# Warning: do not split this quoted string across a line boundary; SGI
+# IRIX 4.0.x make incorrectly preserves the newline, causing
+# compilation commands to fail.  Irix 5.x make handles the newline OK.
+
+SGIFLAGS="CFLAGS= -DUNIX -DLARGE_MACHINE $(OPTIONS) -DVMS_IO -DVMS_TAB -O2 -D_BSD"
+SGI:
+	$(MAKE) $(SGIFLAGS) $(MAKE_OPTIONS) $(TARGETS)
+
+# IRIX uses pre-formatted, packed man pages and nroff is not bundled with it.
+# Only execute this target if your IRIX has nroff.
+SGI-INSTALL: install-exe install-man-sgi
+
+install-man-sgi:
+	$(NROFF) -man dcl2inc.man > dcl2inc.cat ; \
+	if pack dcl2inc.cat ; \
+	then \
+		$(MV) dcl2inc.cat.z $(MANDIR)/dcl2inc.z ; \
+		$(CHMOD) 644 $(MANDIR)/dcl2inc.z ; \
+	fi
+	$(NROFF) -man ftnchek.man > ftnchek.cat ; \
+	if pack ftnchek.cat ; \
+	then \
+		$(MV) ftnchek.cat.z $(MANDIR)/ftnchek.z ; \
+		$(CHMOD) 644 $(MANDIR)/ftnchek.z ; \
+	fi
+	-$(RM) $(MANDIR)/fcl2vcg.z
+
+
+SOLARIS2.x SUNOS5.x:
+	$(MAKE) "CFLAGS= -DUNIX -DLARGE_MACHINE $(OPTIONS) -xO4 -D_BSD" \
+		$(MAKE_OPTIONS) $(TARGETS)
+
+SOLARIS2.x-gcc SUNOS5.x-gcc:
+	$(MAKE) "CFLAGS= -DUNIX -DLARGE_MACHINE $(OPTIONS) -O2 -D_BSD" \
+		$(MAKE_OPTIONS) CC=gcc $(TARGETS)
+
+SOLARIS2.x-apcc SUNOS5.x-apcc:
+	$(MAKE) "CFLAGS= -DUNIX -DLARGE_MACHINE $(OPTIONS) -O5 -D_BSD" \
+		$(MAKE_OPTIONS) CC=apcc $(TARGETS)
+
+SUNOS4.0:
+	$(MAKE) \
+	"CFLAGS= -DUNIX -DLARGE_MACHINE -DNO_PROTOTYPES $(OPTIONS) -O -D_BSD" \
+		$(MAKE_OPTIONS) $(TARGETS)
+
+# NB: ftnchek 2.8 fails with -O4 on SunOS 4.1.3, but -O3 is okay
+# The failure occurs from bad code generation for forlex.c with cc
+# version RELEASE SC1.0 1Mar1991 (from "showrev cc").
+SUNOS4.1:
+	$(MAKE) \
+	"CFLAGS= -DUNIX -DLARGE_MACHINE -DNO_PROTOTYPES $(OPTIONS) -O3 -D_BSD" \
+		$(MAKE_OPTIONS) $(TARGETS)
+
+ULTRIX-MIPS:
+	$(MAKE) "CFLAGS= -DUNIX $(OPTIONS) -DLARGE_MACHINE -Olimit 2000 -O -D_BSD"\
+		$(MAKE_OPTIONS) $(TARGETS)

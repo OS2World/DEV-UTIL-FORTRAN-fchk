@@ -1,0 +1,11 @@
+c====>Begin Module %MAIN      File t208j.f        All variables
+c
+c     Intrinsic functions
+c
+      INTRINSIC           SQRT
+c
+c     Local variables
+c
+      REAL                A
+c
+c====>End Module   %MAIN      File t208j.f     

@@ -1,0 +1,1320 @@
+
+1 FTNCHEK
+       ftnchek - Fortran 77 program checker
+
+2 Introduction
+      ftnchek  (short  for Fortran checker) is designed to detect cer-
+ tain errors in a Fortran program that a compiler  usually  does  not.
+ ftnchek  is not primarily intended to detect syntax errors.  Its pur-
+ pose is to assist the user  in  finding  semantic  errors.   Semantic
+ errors  are  legal  in  the  Fortran language but are wasteful or may
+ cause incorrect operation.  For example, variables  which  are  never
+ used  may  indicate some omission in the program; uninitialized vari-
+ ables contain garbage which may cause incorrect results to be  calcu-
+ lated; and variables which are not declared may not have the intended
+ type.  ftnchek is intended to assist users in the debugging of  their
+ Fortran  program.   It  is  not  intended to catch all syntax errors.
+ This is the function of the compiler.  Prior to  using  ftnchek,  the
+ user should verify that the program compiles correctly.
+
+ For more detailed information, consult the printed documentation.
+
+2 Invoking_Ftnchek
+       ftnchek is invoked through a command of the form:
+
+        $ ftnchek [/option /option ...] filename [filename ...]
+      The brackets indicate something which is optional.  The brackets
+ themselves are not actually typed.   Here  options  are  command-line
+ switches  or settings, which control the operation of the program and
+ the amount of information that will be printed out.  If no option  is
+ specified,  the  default action is to print error messages, warnings,
+ and informational messages, but not the  program  listing  or  symbol
+ tables.
+
+      Each option begins with the '/' character.  (ftnchek also allows
+ the '-' character to be used.)
+      ftnchek options fall into two categories:  switches,  which  are
+ either  true  or  false, and settings, which have a numeric or string
+ value.  The name of a switch is prefixed by 'no' to turn it off: e.g.
+ /nopure  would turn off the warnings about impure functions. The 'no'
+ prefix can also be used with numeric settings, having the  effect  of
+ turning  off the corresponding warnings.  Settings that control lists
+ of warnings have a special syntax discussed below.  Only the first  3
+ characters of an option name (not counting the '/') need be provided.
+ A colon may be used in place of an equals sign for numeric or  string
+ setting  assignments;  however,  we  show  only  the equals sign form
+ below.
+
+      When more than one option is used, they should be separated by a
+ blank  space.  No blank spaces may be placed around the equals sign (
+ = ) in a setting.  ftnchek "?"  will produce a command summary  list-
+ ing all options and settings.
+      For settings that take a list of warnings, namely /f77, /pretty,
+ /portability, and /truncation, the list consists  of  keywords  sepa-
+ rated  by  commas  or  colons.   The  list can be omitted, having the
+ effect of turning on all the corresponding warnings.   Also,  if  the
+ list is omitted, the setting name can be prefixed with no to turn off
+ all the warnings it controls.  For example, /f77 turns on  all  warn-
+ ings  about  nonstandard  constructions,  while /nof77 turns them all
+ off.    Three special keywords are:
+    help Print out all the warning option keywords controlled  by  the
+        setting,  with  a  brief  explanation of their meanings.  This
+        keyword cannot be given in a list with other keywords.
+    all Set all warnings. This turns on all warnings controlled by the
+        setting.
+    none  Clear  all warnings.  This turns off all warnings controlled
+        by the setting.
+      These special keywords must be given in  full.   For  all  other
+ warning  keywords,  only as many letters of the keyword as are neces-
+ sary to identify it unambiguously need be given.  Including a keyword
+ in the list turns its warnings on.  For example, /f77=intrinsic would
+ turn on only the warnings about use of  nonstandard  intrinsic  func-
+ tions.  Prefixing a keyword by no- turns its warnings off.  For exam-
+ ple, /pretty=no-long-line turns off warnings about lines exceeding 72
+ columns  in  length while leaving all other warnings about misleading
+ appearance in effect.  If a setting has default none, you can turn on
+ all  warnings  except  one  or  two by using all first.  For example,
+ /f77=all,no-include enables warnings about all nonstandard extensions
+ except  INCLUDE  statements.   If  a setting has default all, you can
+ turn off all warnings except one or two by  using  none  first.   For
+ example,  /truncation=none,demotion  would  turn  off  all  precision
+ related warnings except about demotions.
+      When ftnchek starts up, it looks for environment  variables  and
+ also  for a preferences file.  Any options defined in the environment
+ or in the preferences file are used  as  defaults  in  place  of  the
+ built-in defaults.  They are over-ridden by any command line options.
+ See the section on changing the defaults for details about the  envi-
+ ronment options and the preferences file.
+
+2 Files
+      When  giving a name of an input file, the extension is optional.
+ If no extension is given, ftnchek will first look for a project  file
+ with  extension  .prj,  and will use that if it exists.  If not, then
+ ftnchek will look for a Fortran source file with the extension  .for.
+ More  than one file name can be given to ftnchek, and it will process
+ the modules in all files as if they were in a single file.
+
+      Wildcards are allowed in the specification of filenames  on  the
+ command line.
+      If  no filename is given, ftnchek will read input from the stan-
+ dard input.
+
+
+2 Options
+      ftnchek options fall into two categories:  switches,  which  are
+ either  true  or  false, and settings, which have a numeric or string
+ value.  The name of a switch or numeric setting can  be  preceded  by
+ 'no'  to turn it off: e.g. /nousage would turn off the warnings about
+ variable usage.  Only the first 3 characters of an option  name  (not
+ counting  the  '/')  need  be provided.  Most options are positional:
+ each option remains in effect from the point it is encountered  until
+ it is overridden by a later change.
+
+
+3 /arguments=num
+        Controls  warnings  about  mismatches between actual and dummy
+ subprogram arguments.  (An actual argument is an argument  passed  to
+ the  subprogram  by  the  caller;  a  dummy  argument  is an argument
+ received by the subprogram.)
+
+     The meanings of the setting values are as follows:
+    0: turn off all such warnings.
+    1: warn only about different number of arguments.
+    2: warn only about mismatch of data type of arguments and of func-
+        tion itself.
+    3: all warnings.
+
+     Default = turn-on = 3.
+
+     This  setting does not apply to checking invocations of intrinsic
+ functions or statement functions.
+
+     See also: /array, /library, /usage.
+
+
+3 /array=num
+       Controls the degree of strictness in checking agreement between
+ actual  and dummy subprogram arguments that are arrays.  The warnings
+ controlled by this setting are for constructions that  might  legiti-
+ mately be used by a knowledgeable programmer, but that often indicate
+ programming errors.
+
+     The meanings of the setting values are as follows:
+    0: only warn about cases that are  seldom  intentional  (see  note
+        below).
+    1:  warn if the arguments differ in their number of dimensions, or
+        if the actual argument is an array  element  while  the  dummy
+        argument is a whole array.
+    2: warn if both arguments are arrays, but they differ in number of
+        elements.
+    3: give both types of warnings.
+
+     Default = turn-on = 3.
+
+     Note: A warning is always given regardless of this setting if the
+ actual  argument  is  an  array  while the dummy argument is a scalar
+ variable, or if the actual argument is a scalar variable  or  expres-
+ sion  while the dummy argument is an array.  No warning is ever given
+ if the actual argument is an array element while the  dummy  argument
+ is  a scalar variable.  Variable-dimensioned arrays and arrays dimen-
+ sioned with 1 or asterisk match any number of array elements.   There
+ is  no check of whether multi-dimensional arrays agree in the size of
+ each dimension separately.
+
+     See also: /arguments, /library, /usage.
+
+
+3 /calltree=num
+       Causes ftnchek to print out the call structure of the  complete
+ program.   The  value  of num is the sum of numbers selected from the
+ following list:
+    0: do not produce any call graph.
+    1: produce the call graph in tree format.
+    2: produce the call graph in who-calls-who format (same as /refer-
+        ence switch).
+    3: produce the call graph in VCG format (same as /vcg switch).
+    4:  do not prune repeated subtrees (applicable only for format 1).
+    8: do not sort children into alphabetical order.
+
+     Only one of the formats 1, 2, or 3 may be included  in  the  sum.
+ If  no  format  is specified but one of the other options is given so
+ that the number is nonzero, call-tree format will be used.
+
+     Default = turn-on = 1.  See the discussion of the /reference  and
+ /vcg flags for details about these formats.
+
+     For  tree  format, The tree is printed out starting from the main
+ program, which is listed on the first line at the left margin.   Then
+ on  the  following  lines, each routine called by the main program is
+ listed, indented a few spaces, followed by the  subtree  starting  at
+ that routine.
+
+     In  the  default  mode,  if  a routine is called by more than one
+ other routine, its call subtree is printed only the first time it  is
+ encountered  Later  calls  give  only the routine name and the notice
+ ``(see above)''.  To have the subtree printed for each occurrence  of
+ the routine, include 4 (don't-prune) in num.
+
+     Note  that  the  call tree will be incomplete if any of the input
+ files are project files containing more than  one  module  that  were
+ created in /library mode.  See the discussion of project files below.
+
+     Technical points: Each list of routines called by a given routine
+ is  printed  in  alphabetical  order.   If multiple main programs are
+ found, the call tree of each is printed separately.  If no main  pro-
+ gram  is  found, a report to that effect is printed out, and the call
+ trees of any top-level non-library routines are printed.   This  flag
+ only  controls  the printing of the call tree: ftnchek constructs the
+ call tree in any case because it is used to determine  which  library
+ modules  will  be  cross-checked.  See the discussion of the /library
+ flag.
+
+     See also: /crossref, /library, /reference, /sort, /symtab,  /vcg.
+
+
+3 /check
+       This switch is provided so that errors and warning messages can
+ be turned off when ftnchek is used for purposes  other  than  finding
+ bugs,  such  as making declarations or printing the call tree.  It is
+ positional, so after turning all checks off, selected checks  can  be
+ turned  back  on.   The  effect  of  /nocheck is to put all switches,
+ numeric settings, and settings controlling lists of warnings to their
+ turn-off  values, as if they had all been specified with the /no pre-
+ fix.  The only exceptions are /quiet, /source, /wrap  and  /wordsize,
+ which are unaffected by this switch.  Default = yes.
+
+     Parse  errors  (syntax  errors  due  to unrecognized or malformed
+ statements) are not suppressed by this switch, since the results  may
+ be incorrect if ftnchek has not parsed the program correctly.
+
+
+3 /columns=num
+        Set  maximum statement length to num columns.  (Beyond this is
+ ignored.)  This setting is provided to  allow  checking  of  programs
+ which  may  violate  the Fortran standard limit of 72 columns for the
+ length of a statement.  According to  the  standard,  all  characters
+ past  column  72  are  ignored.   If  this  setting  is used when the
+ /f77=long-line option is in effect, a warning will be given  for  any
+ lines  in  which  characters past column 72 are processed.  Turn-on =
+ max = 132.  Default = 72.
+
+     This setting does not suppress warnings  about  the  presence  of
+ characters beyond column 72.  To process code with meaningful program
+ text beyond column  72,  use  this  setting  and  be  sure  the  /f77
+ long-line  option  is  off.  To process code with sequence numbers in
+ columns 73 to 80, leave the the columns setting at the default  value
+ and use the /pretty=no-long-line flag.
+
+
+3 /common=num
+        This  setting  varies  the  strictness  of  checking of COMMON
+ blocks.
+
+     The different levels are:
+    0: no checking.
+    1: in each declaration of a given COMMON block, corresponding mem-
+        ory locations (words or bytes) must agree in data type.
+    2:  also  warn if different declarations of the same block are not
+        equal in total length.
+    3: corresponding variables in each declaration  of  a  block  must
+        agree  in  data  type  and  (if  arrays) in size and number of
+        dimensions.
+
+     Default = turn-on = 3.
+
+     The Fortran 77 Standard requires each named common block, but not
+ blank  common,  to  be the same length in all modules of the program.
+ Level 3 provides an extra degree of checking to  support  a  frequent
+ programming practice.
+
+     See also: /library, /usage, /volatile.
+
+
+3 /crossref
+        Specifies that a cross-reference table be printed.  This table
+ lists each subprogram followed by a list of the  routines  that  call
+ it.  Also prints a table listing each COMMON block followed by a list
+ of the routines that access it.  Default = no.
+
+     The cross-reference listing omits library modules that are not in
+ the  call  tree  of the main program.  The list is alphabetized.  The
+ routines listed as using a COMMON block are those in which some vari-
+ ables  in  the  block  are  accessed,  not simply those routines that
+ declare the block.  (To find out what routines declare a COMMON block
+ but do not use it, see the /usage flag.)
+
+     See also: /calltree, /reference, /sort, /symtab, /vcg.
+
+
+3 /declare
+        If  this  flag  is  set, all identifiers whose datatype is not
+ declared in each module will be listed.   This  flag  is  useful  for
+ helping  to  find  misspelled  variable names, etc.  The same listing
+ will be given if the module  contains  an  IMPLICIT  NONE  statement.
+ Default = no.
+
+     See also: /sixchar, /usage.
+
+
+3 /division
+        This  switch is provided to help users spot potential division
+ by zero problems.  If this switch is selected, every division  except
+ by  a  constant  will  be  flagged.   (It is assumed that the user is
+ intelligent enough not to divide by a  constant  which  is  equal  to
+ zero!)  Default = no.
+
+     See also: /portability, /truncation.
+
+
+3 /extern
+       Causes ftnchek to report whether any subprograms invoked by the
+ program are never defined, or are multiply defined.   Ordinarily,  if
+ ftnchek  is  being  run  on a complete program, each subprogram other
+ than the intrinsic functions should be defined  once  and  only  once
+ somewhere.   Turn  off this switch if you just want to check a subset
+ of files which form part of a larger complete program,  or  to  check
+ all  at  once a number of unrelated files which might each contain an
+ unnamed main program.  Subprogram arguments will still be checked for
+ correctness.  Default = yes.
+
+     The  /extern flag is now superseded by the Level 1 usage checking
+ of subprograms.  For the sake of compatibility with earlier  versions
+ of  ftnchek,  the  /extern  flag  is  retained, so that  /noextern is
+ equivalent to a 0 or 2 in the hundreds place of the  /usage  setting.
+ However, to avoid anomalous behavior, you should not use both /extern
+ and /usage on the command line.  Probably the /extern switch will  be
+ retired eventually.
+
+     See also: /library.
+
+
+3 /f77=list
+       Use this setting to catch language extensions which violate the
+ Fortran 77 Standard.  Such extensions may cause your program  not  to
+ be  portable.   Examples  include  the use of underscores in variable
+ names; variable names longer than  six  characters;  statement  lines
+ longer  than 72 characters; and nonstandard statements such as the DO
+ ... ENDDO structure.  ftnchek does not report on the use of lowercase
+ letters.  By default, all warnings are turned off.
+
+     This  setting  provides  detailed control over the warnings about
+ supported extensions to the Fortran 77 Standard.  The  list  consists
+ of  keywords  separated by commas or colons.  There are three special
+ keywords: all to turn on all the warnings  about  nonstandard  exten-
+ sions,  none  to turn them all off, and help to print the list of all
+ the keywords with a brief explanation of each.  If list  is  omitted,
+ /f77   is  equivalent  to  /f77=all,  and  /nof77  is  equivalent  to
+ /f77=none.  The warning keywords with their meanings are as  follows.
+    accept-type: ACCEPT and TYPE I/O statements.
+    backslash: Unix backslash escape in strings.  This warning will be
+        given only if the /source setting value 4 (UNIX backslash)  is
+        specified to cause the escape interpretation of backslash..
+    byte: BYTE data type declaration.
+    common-subprog-name:  Common  block and subprogram having the same
+        name.
+    continuation: More than 19 successive continuation lines.
+    cpp: Unix C preprocessor directives in the source code.
+    d-comment: Debugging comments starting with D in the source  code.
+    dec-tab:  DEC Fortran style tab-formatted source code.  This warn-
+        ing will be given only if the /source setting value 1 is spec-
+        ified to cause interpretation of tabs in this style.
+    do-enddo:  DO  loop  extensions: terminal statement label omitted,
+        END DO, and WHILE.
+    double-complex: Double precision complex datatype.
+    format-dollarsign: Dollar sign control code in FORMAT  statements.
+    format-edit-descr:  Nonstandard  edit descriptors in FORMAT state-
+        ments.
+    function-noparen: Function definition without parentheses.
+    implicit-none: IMPLICIT NONE statement.
+    include: INCLUDE statement.
+    inline-comment:  Inline  comments  starting  with  an  exclamation
+        point.
+    internal-list-io: List-directed I/O to or from an internal file.
+    intrinsic: Nonstandard intrinsic functions.
+    long-line:  Statements with meaningful code past 72 columns.  This
+        warning is given only if the /columns setting has been used to
+        increase the statement field width.
+    long-name: Identifiers over 6 characters long.
+    mixed-common:  Mixed  character  and  noncharacter  data in COMMON
+        block.
+    mixed-expr: Nonstandard  type  combinations  in  expressions,  for
+        example  DOUBLE PRECISION with COMPLEX, assigning hollerith to
+        integer, logical operations on integers.
+    name-dollarsign: Dollar sign used as a character in identifiers.
+    name-underscore: Underscore used as a character in identifiers.
+    namelist: NAMELIST statement.
+    param-intrinsic: Intrinsic function or exponentiation  by  a  real
+        used to define the value of a PARAMETER definition.
+    param-noparen: PARAMETER statement without parentheses.
+    pointer: ``Cray pointer'' syntax.
+    quotemark:  Strings  delimited by quote marks rather than apostro-
+        phes.
+    typeless-constant: Typeless constants, for example Z'19AF.
+    type-size:  Type  declarations  specifying  a  size,  for  example
+        REAL*8.
+    variable-format:  Variable  repeat  specification or field size in
+        FORMAT.  These are of the form < expr >.
+    vms-io: The following VMS Fortran keywords used in I/O statements:
+
+        NAME (in OPEN; it is standard only in INQUIRE)
+        BLOCKSIZE         EXTENDSIZE        READONLY
+        BUFFERCOUNT       INITIALSIZE       RECORDSIZE
+        CARRIAGECONTROL   MAXREC            RECORDTYPE
+        DEFAULTFILE       NOSPANBLOCK       SHARED
+        DISP              ORGANIZATION      TYPE
+        DISPOSE
+
+
+     See also: /portability, /pretty, /wordsize.
+
+
+3 /help
+        Prints  a  list  of  all the command-line options with a short
+ description of each along with its default value.   This  command  is
+ identical  in  function  to the ``?''  argument, and is provided as a
+ convenience for those systems in which the question mark has  special
+ meaning to the command interpreter.  Default = no.
+
+     The  help  listing also prints the version number and patch level
+ of ftnchek and a copyright notice.
+
+     Note: the ``default'' values printed in square  brackets  in  the
+ help  listing  are,  strictly speaking, not the built-in defaults but
+ the current values after any environment options and any command-line
+ options preceding the /help option have been processed.
+
+     See  also:  /version, /f77=help, /portability=help, /pretty=help,
+ /truncation=help.
+
+
+3 /include=path
+       Specifies a directory to be searched  for  files  specified  by
+ INCLUDE  statements.  Unlike other command-line options, this setting
+ is cumulative; that is, if it is given more than once on the  command
+ line, all the directories so specified are placed on a list that will
+ be searched in the same order as they are given.  The order in  which
+ ftnchek searches for a file to be included is: the current directory;
+ the directory specified by environment  variable  FTNCHEK_INCLUDE  if
+ any; the directories specified by any /include options; the directory
+ specified by environment variable INCLUDE; and finally in a  standard
+ systemwide directory (/usr/include for UNIX, SYS$LIBRARY for VMS, and
+ \include for MSDOS).
+
+
+3 /intrinsic=num
+       Controls treatment of  nonstandard  intrinsic  functions.   The
+ setting  consists of three digits.  The ones digit selects the set of
+ intrinsic functions to be supported.  Set 0 selects only  Fortran  77
+ standard  intrinsics  plus those needed to support the double complex
+ data type:
+
+     CDABS    CDSQRT   DREAL    ZLOG
+     CDCOS    DCMPLX   IMAG     ZSIN
+     CDEXP    DCONJG   ZABS     ZSQRT
+     CDLOG    DIMAG    ZEXP     ZCOS
+     CDSIN
+
+ Set 1 includes set 0 as well  as  the  following  commonly  available
+ intrinsics  (all except EXIT and LOC are defined in MIL-STD 1753):
+
+     BTEST    IBCLR    IEOR     ISHFTC
+     EXIT     IBITS    IOR      LOC
+     IAND     IBSET    ISHFT    NOT
+
+ Set 2 includes set 1, plus these common Unix intrinsic functions:
+
+     ABORT    GMTIME   LTIME    SRAND
+     AND      IARGC    OR       SYSTEM
+     GETARG   IRAND    RAND     TIME
+     GETENV   LSHIFT   RSHIFT   XOR
+
+ Set 3 includes set 1, plus these common VMS functions:
+
+     DATE     IDATE    SECNDS   TIME
+     ERRSNS   RAN      SIZEOF
+
+ The  tens  digit  of  this  setting  controls  the syntax of the RAND
+ intrinsic function.  Specify 0 to require invocation  with  no  argu-
+ ment,  1  to  require  one argument, and 2 to allow either form.  The
+ hundreds digits controls the syntax of the IARGC function in the same
+ way.
+
+     Note  that  this  setting  does  not control whether non-standard
+ warnings are issued about these functions.  It controls  whether  the
+ functions  are  assumed  to be intrinsic or not, which determines how
+ their usage is checked.  When functions in  any  of  these  sets  are
+ included,  their  invocations  will be checked according to the rules
+ for the intrinsic functions; otherwise they will be checked as normal
+ (user-written)  external  functions.   The  non-standard warnings are
+ controlled by the /f77=intrinsic option.
+
+     Default setting = turn-on = 222 for the Unix version, 223 for the
+ VMS  version,  and 221 for all other versions of ftnchek.  Turn-off =
+ 0.
+
+
+3 /library
+       This switch is used when a number of subprograms are  contained
+ in  a  file,  but  not all of them are used by the application.  Nor-
+ mally, ftnchek warns you if any subprograms  are  defined  but  never
+ used.  This switch will suppress these warnings.  Default = no.
+
+     This switch also controls which subprogram calls and COMMON block
+ declarations are checked.  If a file is read with the  /library  flag
+ in  effect, the subprogram calls and COMMON declarations contained in
+ a routine in that file will be checked only if that routine is in the
+ main  program's call tree.  On the other hand, if the /library switch
+ is turned off, then ftnchek checks the  calls  of  every  routine  by
+ every  other routine, regardless of whether those routines could ever
+ actually be invoked at run time, and likewise all COMMON block decla-
+ rations are compared for agreement.
+
+     The difference between this switch and the /usage level 2 setting
+ for subprograms is that the latter suppresses only the warning  about
+ routines  being declared but not used.  The /library switch goes fur-
+ ther and excludes unused routines processed while  it  is  in  effect
+ from all cross-checking of arguments and COMMON block declarations as
+ well.
+
+     (If there is no main program anywhere in the set  of  files  that
+ ftnchek  has  read,  so that there is no call tree, then ftnchek will
+ look for any non-library routines that are not called  by  any  other
+ routine,  and  use  these as substitutes for the main program in con-
+ structing the call tree and deciding what to check.  If no such  top-
+ level non-library routines are found, then all inter-module calls and
+ all COMMON declarations will be checked.)
+
+     See also: /arguments, /calltree, /common, /extern, /usage.
+
+
+3 /list
+       Specifies that a listing  of  the  Fortran  program  is  to  be
+ printed  out  with  line  numbers.   If ftnchek detects an error, the
+ error message follows the program line with a caret ( ^ )  specifying
+ the  location  of  the  error.   If  no source listing was requested,
+ ftnchek will still print out any line containing an error, to aid the
+ user in determining where the error occurred.  Default = no.
+
+     See also: /symtab, /quiet.
+
+
+3 /makedcls=num
+        Prepare  a neatly-formatted file of declarations of variables,
+ common blocks, and namelist lists,  for  possible  merging  into  the
+ source  code.  The declarations are stored in a file of the same name
+ as the source code, but with the extension changed to  .dcl.   If  no
+ declarations are written to the file, it is deleted to reduce clutter
+ from empty files.
+
+     If input comes from standard input, instead of a named file, then
+ declarations are written to standard output.
+
+     Variables are declared in alphabetical order within each declara-
+ tion class and type, with integer variables first, because  of  their
+ later possible use in array dimensions.
+
+     PARAMETER  statements  are an exception to the alphabetical order
+ rule, because the Fortran 77 Standard requires that  the  expressions
+ defining parameter values refer only to constants and already-defined
+ parameter names.  This forces the original source file order of  such
+ statements to be preserved in the declaration files.
+
+     Explicit  declaration  of all variables is considered good modern
+ programming practice.  By using compiler options to reject undeclared
+ variables,  misspelled variable names (or names extending past column
+ 72) can be  caught  at  compile  time.   Explicit  declarations  also
+ greatly  facilitate  changing  floating-point  precision with filters
+ such  as  dtoq(1L),  dtos(1L),  fd2s(1L),  fs2d(1L),  qtod(1L),   and
+ stod(1L).   These  programs are capable of changing types of explicit
+ floating-point type declarations, intrinsic functions, and constants,
+ but  because  they  do not carry out rigorous lexical and grammatical
+ analysis of the Fortran source code,  they  cannot  provide  modified
+ type  declarations  for  undeclared  variables.  Default setting = 0,
+ turn-on = 1.
+
+     The setting values are given by the sum of selected option values
+ from the following list:
+    0: Do not write a declaration file.
+    1: Write a declaration file.
+    2:  Normally,  all variables are included in the declaration file.
+        With this option, include  only  undeclared  variables.   This
+        setting  is  useful  if you want to check for undeclared vari-
+        ables, since Fortran source files with all variables  properly
+        declared  will  not  result in a .dcl file.  With this option,
+        common blocks and namelist lists will not be included  in  the
+        declaration  file,  since by their nature they cannot be unde-
+        clared.
+    4: The declarations are normally prettyprinted to line  up  neatly
+        in  common  columns, as in the declaration files output by the
+        Extended PFORT Verifier, pfort(1L).  This option value selects
+        instead compact output, without column alignment.
+    8:  Causes  continuation  lines to be used where permissible.  The
+        default is to begin a new  declaration  on  each  line.   This
+        option  is appropriate to use with the option for compact out-
+        put.
+    16: Output Fortran keywords in lowercase, instead of  the  default
+        uppercase.
+    32:  Output  variables  and constants in lowercase, instead of the
+        default  uppercase.    Character  string  constants  are   not
+        affected by this option.
+    64:  Omit  declarations  of internal integer variables produced by
+        the SFTRAN3 preprocessor, xsf3(1L), as part of the translation
+        of  structured  Fortran statements to ordinary Fortran.  These
+        variables have six-character names of the form NPRddd, NXdddd,
+        N2dddd,  and N3dddd, where d is a decimal digit.  Because they
+        are invisible in the SFTRAN3 source code, and will  change  if
+        the  SFTRAN3  code  is  modified, such variables should not be
+        explicitly declared.  Instead, they  should  just  assume  the
+        default  Fortran INTEGER data type based on their initial let-
+        ter, N.
+    128: Use an asterisk as the comment character; the default is oth-
+        erwise 'C'.
+    256: Use 'c' instead of 'C' or '*' as the comment character.
+    512:  Suppress  dimensioning  of  arrays in the generated declara-
+        tions.  This option is for use with code lacking type declara-
+        tions,  to  allow the declaration files to be inserted without
+        change into the code.  Since  the  code  will  have  dimension
+        statements  already,  dimensioning  the array variables in the
+        type statements of the declaration file  is  redundant.   This
+        option  should  be  used  only  in conjunction with option 2 =
+        undeclared-only because otherwise any arrays that were  dimen-
+        sioned in a type statement will lose their dimensioning.
+
+     If  any  non-zero  value is specified, then declaration output is
+ selected, even if the value 1 was not included in the sum.
+
+     The declaration files contain distinctive comments that mark  the
+ start  and  end  of declarations for each program unit, to facilitate
+ using text editor macros for merging the declarations back  into  the
+ source code.
+
+     The  ftnchek distribution includes a program, dcl2inc, which pro-
+ cesses declaration files to produce files containing declarations  of
+ all  COMMON blocks, in a form suitable for use as INCLUDE files.  See
+ the dcl2inc man page for the details of its use.
+
+
+3 /novice
+       This flag is intended to provide more helpful output for begin-
+ ners.  It has two effects:
+    (a)  provides  an extra message to the effect that a function that
+        is used but not defined anywhere might be an array  which  the
+        user  forgot  to  declare  in a DIMENSION statement (since the
+        syntax of an array reference is the same as that of a function
+        reference).
+    (b)  modifies the form of the error messages and warnings.  If the
+        flag is turned off by /nonovice, these messages are printed in
+        a style more resembling UNIX lint.
+
+     Default = yes.
+
+
+
+3 /output=filename
+        This  setting  is provided for convenience on systems which do
+ not allow easy redirection of output from programs.  When  this  set-
+ ting  is  given, the output which normally appears on the screen will
+ be sent instead to the named file.  Note, however,  that  operational
+ errors of ftnchek itself (e.g. out of space or cannot open file) will
+ still be sent to the screen.   The  extension  for  the  filename  is
+ optional,  and  if  no extension is given, the extension .lis will be
+ used.
+
+
+3 /portability=list
+       ftnchek will  give  warnings  for  a  variety  of  non-portable
+ usages.   Examples  include  the  use  of  tabs except in comments or
+ inside strings, the use of Hollerith constants, and the equivalencing
+ of  variables  of different data types.  This option does not produce
+ warnings for supported extensions to the Fortran 77  Standard,  which
+ may  also  cause  portability problems.  To catch those, use the /f77
+ setting.  By default, all warnings are turned off.
+
+     This setting provides detailed control over  the  warnings  about
+ possible  portability  problems.  The list consists of keywords sepa-
+ rated by commas or colons.  There are three special keywords: all  to
+ turn  on all the warnings about nonportable usages, none to turn them
+ all off, and help to print the list of all the keywords with a  brief
+ explanation  of each.  If list is omitted, /portability is equivalent
+ to /portability=all, and /noportability is equivalent  to  /portabil-
+ ity=none.  The warning keywords with their meanings are as follows:
+    backslash:  Backslash  character in strings.  Since some compilers
+        treat the backslash as an escape character, its  presence  can
+        cause problems even though it is used in a standard-conforming
+        way.
+    common-alignment: COMMON block variables not in  descending  order
+        of storage size.  Some compilers require this ordering because
+        of storage alignment requirements.
+    hollerith: Hollerith constants (other than within FORMAT  specifi-
+        cations).   The Hollerith data type is a feature of Fortran IV
+        that has been deleted in  the  Fortran  77  standard.   It  is
+        superseded by the character data type.  Storing Hollerith data
+        in variables of a numeric or logical data type is  nonportable
+        due to differing word sizes.
+    long-string:  String constants, variables, or expressions over 255
+        chars long.
+    mixed-equivalence: Variables of different data types equivalenced.
+    mixed-size:  Variables  declared  with default precision used with
+        variables given explicit precision,  in  expressions,  assign-
+        ments,  or  as arguments.  For example, if a variable declared
+        as REAL*8 is treated as equivalent to DOUBLE PRECISION.
+    real-do: Non-integer DO loop index and bounds.  These can cause  a
+        program's results to depend on the hardware characteristics of
+        the particular computer used.
+    tab: Tabs in source code.  Tabs  are  interpreted  differently  by
+        different compilers.  This warning will be given only once, at
+        the end of the file.
+
+     See also: /f77, /hollerith, /pretty, /wordsize.
+
+
+3 /pretty=list
+       Controls certain messages related  to  the  appearance  of  the
+ source  code.  These warn about things that might make a program less
+ readable or be deceptive to the reader.  By default, all warnings are
+ turned on.
+
+     This  setting  provides  detailed control over the warnings about
+ appearance.  The list consists of keywords  separated  by  commas  or
+ colons.  Since all warnings are on by default, include a keyword pre-
+ fixed by no- to turn off a particular warning.  There are three  spe-
+ cial  keywords:  all  to  turn  on  all the warnings about misleading
+ appearances, none to turn them all off, and help to print the list of
+ all  the keywords with a brief explanation of each.  If list is omit-
+ ted, /pretty is equivalent to /pretty=all, and /nopretty  is  equiva-
+ lent  to  /pretty=none.  The warning keywords with their meanings are
+ as follows:
+    embedded-space: Space embedded in variable names.
+    continuation: Continuation mark following a comment line.
+    long-line: Lines  (except  comments)  over  72  columns  in  width
+        (beyond 72 is normally ignored by compiler).
+    missing-space: Lack of space between variable and a preceding key-
+        word.
+    multiple-common: COMMON block declared in multiple statements.  No
+        warning  is given if the statements are consecutive except for
+        comment lines.
+    multiple-namelist: NAMELIST declared in multiple  statements.   No
+        warning  is given if the statements are consecutive except for
+        comment lines.
+    parentheses: Parentheses around a variable by itself.  As  a  sub-
+        program  argument,  this makes the argument an expression, not
+        modifiable by the subprogram.
+
+     See also: /f77, /portability.
+
+
+3 /project
+       ftnchek will create a project file from each source  file  that
+ is  input  while  this  flag  is in effect.  The project file will be
+ given the same name as the input file, but with the extension  .f  or
+ .for replaced by .prj.  (If input is from standard input, the project
+ file is named ftnchek.prj.)  Default = no.
+
+     A project file contains a summary of information from the  source
+ file,  for  use in checking agreement among FUNCTION, SUBROUTINE, and
+ COMMON usages in other files.  It allows incremental checking,  which
+ saves  time  whenever you have a large set of files containing shared
+ subroutines, most of which seldom change.  You can run  ftnchek  once
+ on  each file with the /project flag set, creating the project files.
+ Usually you would also set the /library and /noextern flags  at  this
+ time,  to suppress messages relating to consistency with other files.
+ Only error messages pertaining to each file by itself will be printed
+ at this time.  Thereafter, run ftnchek without these flags on all the
+ project files together, to  check  consistency  among  the  different
+ files.   All  messages  internal  to the individual files will now be
+ omitted.  Only when a file is altered will a new project file need to
+ be made for it.
+
+     Naturally,  when  the /project flag is set, ftnchek will not read
+ project files as input.
+
+     Project files contain only information needed for checking agree-
+ ment  between  files.  This means that a project file is of no use if
+ all modules of the complete program are contained in a single file.
+
+     A more detailed discussion is given in the section on Using  Pro-
+ ject Files.
+
+
+3 /pure
+        Assume  functions  are ``pure'', i.e., they will not have side
+ effects by modifying their arguments or variables in a COMMON  block.
+ When  this  flag is in effect, ftnchek will base its determination of
+ set and used status of the actual arguments on  the  assumption  that
+ arguments passed to a function are not altered.  It will also issue a
+ warning if a function is found to modify any of its arguments or  any
+ COMMON variables.  Default = yes.
+
+     When  this  flag  is turned off, actual arguments passed to func-
+ tions will be handled the same way as actual arguments passed to sub-
+ routines.   This means that ftnchek will assume that arguments may be
+ modified by the functions.  No warnings will be given if  a  function
+ is found to have side effects.  Because stricter checking is possible
+ if functions are assumed to be pure, you should turn  this  flag  off
+ only if your program actually uses functions with side effects.
+
+
+3 /quiet
+        This  option  reduces  the amount of output relating to normal
+ operation, so that error messages are more apparent.  This option  is
+ provided  for  the convenience of users who are checking large suites
+ of files.  The eliminated output includes the names of project files,
+ and the message reporting that no syntax errors were found.  (Some of
+ this output is turned back on by  the  /list  and  /symtab  options.)
+ Default = no.
+
+
+3 /reference
+        Specifies  that  a who-calls-who table be printed.  This table
+ lists each subprogram followed by a list of the  routines  it  calls.
+ This switch is equivalent to /calltree=2.  Default = no.
+
+     The  reference  list omits routines called by unused library mod-
+ ules.  Thus it contains the same information  as  for  the  call-tree
+ format,  namely  the  hierarchy of subprogram calls, but printed in a
+ different way.  This prints out a breadth-first traversal of the call
+ tree  whereas /calltree prints out a depth-first traversal.  Only one
+ format is printed.  If both /calltree and /reference flags are given,
+ the former will take precedence.
+
+     See also: /calltree, /crossref, /library, /sort, /symtab, /vcg.
+
+
+3 /resources
+        Prints  the  amount of resources used by ftnchek in processing
+ the program.  This listing may be useful in analyzing  the  size  and
+ complexity  of  a program.  It can also help in choosing larger sizes
+ for ftnchek's internal tables if they are too small to analyze a par-
+ ticular program.  Default = no.
+
+     In  this  listing,  the  term  ``chunk  size'' is the size of the
+ blocks of memory allocated to store the item in question, in units of
+ the  size  of one item, not necessarily in bytes.  When the initially
+ allocated space is filled up, more memory is allocated in  chunks  of
+ this size.  The following is an explanation of the items printed:
+    Source  lines processed: Total number of lines of code, with sepa-
+        rate totals for statement lines and  comment  lines.   Comment
+        lines  include  lines  with  'C' or '*' in column 1 as well as
+        blank lines and  lines  containing  only  an  inline  comment.
+        Statement lines are all other lines, including lines that have
+        an inline comment following some code.  Continuation lines are
+        counted as separate lines.  Lines in include files are counted
+        each time the file is included.
+    Total executable statements: Number of statements in the  program,
+        other  than  specification,  data, statement-function, FORMAT,
+        ENTRY, and END statements.
+    Total number of modules: A  module  is  any  external  subprogram,
+        including  the main program, subroutines, functions, and block
+        data units.  This count  is  of  modules  defined  within  the
+        source,  not  modules referenced.  Statement functions are not
+        included.  A subprogram with multiple  entry  points  is  only
+        counted once.
+    Max  identifier  name chars: Number of characters used for storing
+        identifier names.  An identifier is a variable, subprogram, or
+        common  block  name.  Local names are those of local variables
+        in a subprogram, whereas global names refer to subprogram  and
+        common block names, as well as dummy argument names and common
+        variable names.  Actual argument text (up to 15 characters for
+        each  argument)  is  also  included  here.  The space used for
+        local names is recovered at the end of  each  module,  whereas
+        the  global  space  grows until the whole program is analyzed.
+        Unfortunately, this figure may include some common block names
+        and  arguments  stored more than once, although a heuristic is
+        used that will avoid duplicates in many cases.
+    Max token text chars: A token is the smallest  syntactic  unit  of
+        the FORTRAN language above the level of individual characters.
+        For instance a token can be a variable name, a numerical  con-
+        stant,  a  quoted  text  string,  or  a punctuation character.
+        Token text is stored while a module is being  processed.   For
+        technical reasons, single-character tokens are not included in
+        this total.  Items that are  not  represented  in  the  symbol
+        table  may  be duplicated.  The space for token text is recov-
+        ered at the end of each module, so this figure represents  the
+        maximum for any one module.
+    Max  local  symbols:  This is the largest number of entries in the
+        local symbol table for any module.  Local symbol table entries
+        include  all  variables  and  parameters,  common block names,
+        statement functions, external subprograms and intrinsic  func-
+        tions  referenced  by  the  module.  Literal constants are not
+        stored in the local symbol table.
+    Max global symbols: This is the number of entries  in  the  global
+        symbol  table  at  the end of processing.  Global symbol table
+        entries include external subprogram and  common  block  names.
+        Intrinsic  functions and statement functions are not included.
+    Max number of tokenlists: A token list is  a  sequence  of  tokens
+        representing  the  actual  or dummy argument list of a subpro-
+        gram, or the list of variables in a common block or  namelist.
+        Therefore  this  number  represents the largest sum of COMMON,
+        CALL, NAMELIST and ENTRY statements and  function  invocations
+        for any one module.  The space is recovered at the end of each
+        module.
+    Max token list/tree space: This is the largest number of tokens in
+        all  the  token  lists  and  token trees of any one module.  A
+        token tree  is  formed  when  analyzing  an  expression:  each
+        operand  is  a  leaf  of  the  tree, and the operators are the
+        nodes.  Therefore this number is a measure of the maximum com-
+        plexity  of  an individual module.  For instance a module with
+        many long arithmetic expressions  will  have  a  high  number.
+        Note  that  unlike  token  text described above, the number of
+        tokens is independent of the length of the variable  names  or
+        literal constants in the expressions.
+    Number of subprogram invocations: This is the sum over all modules
+        of the number of  CALL  statements  and  function  invocations
+        (except intrinsic functions and statement functions).
+    Number  of common block decls: This is the sum over all modules of
+        the number of common block declarations.  That is, each decla-
+        ration of a block in a different module is counted separately.
+        (The standard allows multiple declarations of a  block  within
+        the  same  module;  these  are counted as only one declaration
+        since they are equivalent to a single long declaration.)
+    Number of array dim & param ptrs: This is the sum over all modules
+        of the number of array dimension and parameter definition text
+        strings saved for use by the /makedcls option.  The length  of
+        the text strings is not counted.  Each dimension of a multidi-
+        mensional array is counted separately.
+
+     These numbers are obviously not the same when project  files  are
+ used  in  place  of  the  original source code.  Even the numbers for
+ global entities may be different, since some redundant information is
+ eliminated in project files.
+
+
+3 /sixchar
+        One  of  the  goals of the ftnchek program is to help users to
+ write  portable  Fortran   programs.    One   potential   source   of
+ nonportability  is the use of variable names that are longer than six
+ characters.  Some compilers just ignore the extra  characters.   This
+ behavior could potentially lead to two different variables being con-
+ sidered as the same.  For instance, variables named  AVERAGECOST  and
+ AVERAGEPRICE  are  the same in the first six characters.  If you wish
+ to catch such possible conflicts, use this flag.  Default = no.
+
+     Use the /f77=long-names if you want to list all variables  longer
+ than  six  characters,  not just those pairs that are the same in the
+ first six.
+
+     See also: /f77, /portability.
+
+
+3 /sort
+       Specifies that a sorted list of all modules used in the program
+ be printed.  This list is in ``prerequisite'' order, i.e. each module
+ is printed only after all the modules from which it  is  called  have
+ been printed.  This is also called a ``topological sort'' of the call
+ tree.  Each module is listed only once.  Routines that are not in the
+ call  tree  of the main program are omitted.  If there are any cycles
+ in the call graph (illegal in standard Fortran) they will be detected
+ and diagnosed.  Default = no.
+
+     See also: /calltree, /crossref, /reference, /symtab, /vcg.
+
+
+3 /source=num
+        This  setting  controls  certain options about the form of the
+ Fortran source code.  The setting value is the sum  of  numbers  from
+ the following list:
+    1:  Accept  DEC-style tab-formatted source.  A line beginning with
+        an initial tab will be treated as a new statement line  unless
+        the  character after the tab is a nonzero digit, in which case
+        it is treated as a continuation line.  The next  column  after
+        the  tab or continuation mark is taken as column 7.  A warning
+        will be given in the case where the line is a continuation, if
+        /f77=dec-tab is in effect.
+    2:  Accept  VMS-style INCLUDE statements.  These follow the normal
+        syntax, but with the following additional  features:  (1)  the
+        file extension, if not given, defaults to the same as a normal
+        source file extension; and (2) the option /LIST or /NOLIST can
+        be  appended  to  the include-file name, to control listing of
+        its contents.
+    4: Handle UNIX-style backslash escapes in character strings.   The
+        escape  sequence  following  the  backslash  will be evaluated
+        according to the ANSI standard for strings in C: up  to  three
+        digits  signify  an octal value, an x signifies the start of a
+        hexadecimal constant, any of the letters a b f n r  t  signify
+        special control codes, and any other character (including new-
+        line) signifies the character itself.  When this  source  code
+        option   is  in  effect,  a  warning  will  be  given  if  the
+        /f77=backslash setting is specified.
+
+     The default behavior is to treat the  backslash  like  any  other
+ normal  character,  but a warning about portability will be generated
+ if the /portability flag is set.  Because of the fact that some  com-
+ pilers  treat  the backslash in a nonstandard way, it is possible for
+ standard-conforming programs to be non-portable if they use the back-
+ slash character in strings.
+
+     Since ftnchek does not do much with the interpreted string, it is
+ seldom necessary to use this option.  It is needed in order to  avoid
+ spurious  warnings  only  if (a) the program being checked uses back-
+ slash to embed an apostrophe or quote mark in  a  string  instead  of
+ using  the  standard  mechanism  of  doubling  the delimiter; (b) the
+ backslash is used to escape the end-of-line in order  to  continue  a
+ string  across  multiple  source lines; or (c) a PARAMETER definition
+ uses an intrinsic string function such as LEN with such a  string  as
+ argument,  and  that  value is later used to define array dimensions,
+ etc.
+
+     Default setting = 0, turn-on = 7.
+
+
+3 /symtab
+       A symbol table will be printed out for each module, listing all
+ identifiers  mentioned  in  the module.  This table gives the name of
+ each variable, its datatype, and the number of dimensions for arrays.
+ An  asterisk  (*)  indicates  that  the  variable has been implicitly
+ typed, rather than being named in an explicit type declaration state-
+ ment.   The  table  also lists all subprograms invoked by the module,
+ all COMMON blocks declared, etc.  Default = no.
+
+     See also: /calltree, /crossref, /list, /reference, /sort, /vcg.
+
+
+3 /truncation=list
+       Warn about possible truncation (or roundoff) errors.   Most  of
+ these  are  related  to integer arithmetic.  By default, all warnings
+ are turned on.
+
+     This setting provides detailed control over  the  warnings  about
+ possible  truncation errors.  The list consists of keywords separated
+ by commas or colons.  Since all warnings are on by default, include a
+ keyword  prefixed by no- to turn off a particular warning.  There are
+ three special keywords: all to turn on all the warnings about trunca-
+ tion,  none  to  turn them all off, and help to print the list of all
+ the keywords with a brief explanation of each.  If list  is  omitted,
+ /truncation  is  equivalent  to /truncation=all, and /notruncation is
+ equivalent to /truncation=none.   The  warning  keywords  with  their
+ meanings are as follows:
+    demotion:  automatic  conversion of a higher precision quantity to
+        one of lower precision.  This warning includes  conversion  of
+        real  quantities to integer, double precision to single preci-
+        sion real, and assignment of a longer character  string  to  a
+        shorter  one.  Also, if explicit sizes are used in type decla-
+        rations, a warning is given  if  a  longer-sized  quantity  is
+        assigned to one of shorter size, e.g. if an INTEGER*4 variable
+        is assigned to an INTEGER*2.
+    int-div-exponent: use of the result  of  integer  division  as  an
+        exponent.  This suggests that a real quotient is intended.  An
+        example would be writing X**(1/3) to evaluate the cube root of
+        X. The correct expression is X**(1./3.).
+    int-div-real:  Conversion  of  an  expression involving an integer
+        division to real.  This  suggests  that  a  real  quotient  is
+        intended.
+    int-div-zero:  division  in  an  integer  constant expression that
+        yields a result of zero.
+    int-neg-power: exponentiation of an integer by a negative  integer
+        (which yields zero unless the base integer is 1 in magnitude).
+        This suggests that a real base is intended.
+    promotion: automatic conversion of a lower precision  quantity  to
+        one  of higher precision.  The loss of accuracy for real vari-
+        ables in this process is comparable to the corresponding demo-
+        tion.  No warning is given for promotion of integer quantities
+        to real since this is ordinarily exact.
+    real-do-index: use of a non-integer DO index in a loop with  inte-
+        ger  bounds.   An  integer DO index with real bounds is always
+        warned about regardless of this setting.
+    real-subscript: use of a non-integer array subscript.
+    significant-figures: overspecifying a single  precision  constant.
+        This  may  indicate  that  a  double  precision  constant  was
+        intended.
+
+     The warnings about promotion and demotion also apply  to  complex
+ constants, considering the precision to be that of the real or imagi-
+ nary part.  Warnings about promotions and demotions  are  given  only
+ when  the  conversion  is  done automatically, e.g. in expressions of
+ mixed precision or in an assignment statement.   If  intrinsic  func-
+ tions  such  as INT are used to perform the conversion, no warning is
+ given.
+
+     See also: /portability, /wordsize.
+
+
+3 /usage=num
+       Warn about unused or possible uninitialized  variables,  unused
+ common blocks, and unused or undefined subprograms.
+
+     This  setting is composed of three digits.  The first digit (hun-
+ dreds place) controls warnings about subprograms (functions and  sub-
+ routines), the second digit (tens place) warnings about common blocks
+ and common variables,, and the  third  digit  (ones  place)  warnings
+ about local variables.  Each digit controls warnings according to the
+ following scale:
+    0: no warnings.
+    1: warn about undefined items: subprograms that are used but never
+        defined,  common  block variables that are used but never set,
+        or local variables that are (or may be) used before  they  are
+        set.
+    2: warn about unused items: subprograms that are defined but never
+        used (unless taken in library mode), common blocks and  common
+        variables  that  are  unused,  or  local  variables  that  are
+        declared or set but never used.
+    3: give both types of warnings.
+
+     Default = turn-on = 333.
+
+     Sometimes ftnchek makes a mistake in  the  warnings  about  local
+ variable  usage.   Usually  it  errs  on the side of giving a warning
+ where no problem exists, but in rare cases it may fail to warn  where
+ the  problem  does  exist.  See the section on Bugs for examples.  If
+ variables are equivalenced, the rule used by ftnchek is that a refer-
+ ence  to  any variable implies the same reference to all variables it
+ is equivalenced to.  For arrays, the rule is that a reference to  any
+ array element is treated as a reference to all elements of the array.
+
+     When checking for used-before-set errors involving  COMMON  vari-
+ ables,  ftnchek does not do a thorough enough analysis of the calling
+ sequence to know which routines are called before others.   So  warn-
+ ings about this type of error will only be given for cases in which a
+ variable is used in some routine but not set in  any  other  routine.
+ Checking  of  individual COMMON variables is done only if the /common
+ setting is 3 (variable by variable agreement).
+
+     The Level 1 value for subprogram usage checking controls warnings
+ about  routines that are invoked by the program but never defined, or
+ are multiply defined.  Ordinarily, if ftnchek is being run on a  com-
+ plete  program,  each  subprogram  other than the intrinsic functions
+ should be defined once and only once somewhere.  Set this digit to  0
+ or 2 if you just want to check a subset of files which form part of a
+ larger complete program, or to check all at once a  number  of  unre-
+ lated  files  which might each contain an unnamed main program.  Sub-
+ program arguments will still be checked for correctness.
+
+     See also: /common, /declare, /extern, /library, /volatile.
+
+
+3 /vcg
+       Produce the call graph in the form of a VCG graph  description.
+ This description is written to a separate file, with the same stem as
+ the file containing the main program, and suffix .vcg.  This file  is
+ able  to  be  given directly to xvcg(1L) to visualize the call graph.
+ (If input is from the standard input, then the graph  description  is
+ sent  to standard output.)  This switch is equivalent to /calltree=3.
+ Default = no.
+
+     The VCG description as created is more complex than it  need  be.
+ VCG allows graphs and nested subgraphs: each subroutine is created as
+ a subgraph nested inside its calling routines.  This  allows  you  to
+ interactively display subgraphs or summarise them.
+
+     The  /vcg  option  for  ftnchek  was written by Dr. Philip Rubini
+ (p.rubini@cranfield.ac.uk).
+
+     xvcg is a graph visualisation tool which runs under the X windows
+ system.  It is freely available from ftp.cs.uni-sb.de. It was written
+ by G. Sander of the University of Saarland, Germany.
+
+
+3 /version
+       This option causes ftnchek to print a line giving  the  version
+ number,  release  date,  and patch level of the program.  If no files
+ are given, it then exits.  If files are given,  the  effect  of  this
+ option  is  to include the patch level (normally omitted) in the ver-
+ sion information printed at the start of processing.  Default = no.
+
+     See also: /help.
+
+
+3 /volatile
+       Assume that COMMON blocks are volatile.  Default = no.
+
+     Many Fortran programmers assume that variables, whether local  or
+ in  COMMON,  are static, i.e. that once assigned a value, they retain
+ that value permanently until assigned a different value by  the  pro-
+ gram.  However, in fact the Fortran 77 Standard does not require this
+ to be the case.  Local variables may become undefined between activa-
+ tions  of  a  module  in  which they are declared.  Similarly, COMMON
+ blocks may become undefined if no module in which they  are  declared
+ is  active.   (The  technical term for entities with this behavior is
+ ``automatic'', but ftnchek uses the word  ``volatile''  since  it  is
+ clearer to the nonspecialist.)  Only COMMON blocks declared in a SAVE
+ statement, or declared in the main program or in a block data subpro-
+ gram remain defined as long as the program is running.  Variables and
+ COMMON blocks that can become undefined  at  some  point  are  called
+ volatile.
+
+     If  the  /volatile flag is turned on, ftnchek will warn you if it
+ finds a volatile COMMON block.  If, at the same time, the /usage set-
+ ting  is  1  or  3 (check used before set), ftnchek will try to check
+ whether such a block can lose its defined status between  activations
+ of the modules where it is declared.  ftnchek does not do a very good
+ job of this: the rule used is to see whether the block is declared in
+ two separated subtrees of the call tree.  For instance, this would be
+ the case if two modules, both called from the main program, shared  a
+ volatile COMMON block.  A block can also become undefined between two
+ successive calls of the same subprogram, but  ftnchek  is  not  smart
+ enough  to tell whether a subprogram can be called more than once, so
+ this case is not checked for.
+
+     The /volatile flag does not affect the  way  ftnchek  checks  the
+ usage of local variables.
+
+     See also: /common, /usage.
+
+
+3 /wordsize=num
+        Specifies  the default word size to be num bytes.  This is the
+ size of logical and single-precision numeric variables that  are  not
+ given  explicit  precisions.   Double-precision and complex variables
+ will be twice this value, and double complex  variables  four  times.
+ Explicit  precisions  for non-character variables are an extension to
+ the Fortran 77 Standard, and are given by type declarations  such  as
+ REAL*8 X.  Default = turn-on = 4 bytes.
+
+     The  word  size  value  does  not  matter  for checking standard-
+ conforming programs that do not declare explicit precisions for  non-
+ character  variables or store Hollerith data in variables.  This set-
+ ting also does not affect the default size  of  character  variables,
+ which  is  always  1  byte.   Hollerith constants also are assumed to
+ occupy 1 byte per character.
+
+     The word size is used to determine whether truncation  occurs  in
+ assignment  statements,  and to catch precision mismatches in subpro-
+ gram argument lists and common block lists.  The exact warnings  that
+ are  issued will depend on the status of other flags.  Under both the
+ /portability=mixed-size and  the  /nowordsize  flag,  any  mixing  of
+ explicit  with  default  precision objects (character expressions not
+ included) is warned about.  This applies  to  arithmetic  expressions
+ containing  both  types  of  objects, and to subprogram arguments and
+ COMMON variables.  Under control of the /truncation=demotion and pro-
+ motion options, a warning is given for assignment of an expression to
+ a shorter variable of the same type, or for promotion of a lower pre-
+ cision  value  to  higher precision in an arithmetic expression or an
+ assignment statement.
+
+     Giving a word size of 0, or equivalently, using /nowordsize means
+ that  no default value will be assumed.  This is equivalent to speci-
+ fying /portability=mixed-size.   Use  it  to  find  cases  of  mixing
+ default  and  explicit  precision,  for  example to flag places where
+ REAL*8 is treated as equivalent to DOUBLE PRECISION.
+
+     See also: /portability, /truncation.
+
+
+3 /wrap=col
+       Controls the wrapping of error messages.  Long  error  messages
+ that would run past the specified column will be broken up into sepa-
+ rate lines between the words of the message for  better  readability.
+ If  turned  off  with  /nowrap,  each  separate error message will be
+ printed on one line, leaving it up to the display to wrap the message
+ or truncate it.  Default = turn-on = 79.
+
+
+2 Changing_the_defaults
+       ftnchek includes two mechanisms for changing the default values
+ of all options: by defining environment variables or  by  creating  a
+ preferences  file.   When ftnchek starts up, it looks in its environ-
+ ment for any variables whose names  are  composed  by  prefixing  the
+ string  FTNCHEK_  onto the uppercased version of the option name.  If
+ such a variable is found, its value is used to  specify  the  default
+ for  the  corresponding  switch  or setting.  In the case of settings
+ (for example, the /common strictness setting) the value of the  envi-
+ ronment  variable  is read as the default setting value.  In the case
+ of switches, the default switch will be taken as true or  yes  unless
+ the environment variable has the value 0 or NO.
+      Note that the environment variable name must be constructed with
+ the full-length  option  name,  which  must  be  in  uppercase.   For
+ example,  to  make ftnchek print a source listing by default, set the
+ environment variable FTNCHEK_LIST to 1 or YES or anything other  than
+ 0  or  NO.   The  names  FTNCHEK_LIS  (not  the  full option name) or
+ ftnchek_list (lower case) would not be recognized.
+
+ The way to set the environment variables on  the  VMS  system  is  by
+ using  the  DEFINE  command.   For  example, to set the default /list
+ switch to YES, give the command
+
+          $ DEFINE FTNCHEK_LIST 1
+      After processing any environment variables, ftnchek looks for  a
+ preferences  file containing options and settings.  It will search in
+ the following order, using only the first file found: (1)  .ftnchekrc
+ in  the  current directory, (2) ftnchek.ini in the current directory,
+ (3) .ftnchekrc in the user's home directory, (4) ftnchek.ini  in  the
+ home  directory.   If such a file is found, the options defined in it
+ are used as defaults in place of the built-in defaults and overriding
+ any defaults set in the environment..
+      Each option or setting in the preferences file must be on a sep-
+ arate line.  They are given in the same form as on the command  line,
+ except  without  the initial slash.  The preferences file can contain
+ blank lines and comments.  Comments are introduced at any point in  a
+ line  by  a  space character (blank or tab) or the '#' character, and
+ are terminated by the end of the line.
+      Command-line options override the defaults set in  the  environ-
+ ment  or  in  the preferences file, in  the same way as they override
+ the built-in defaults.
+
+
+2 Project_files
+       This section contains detailed information on how to  use  pro-
+ ject files most effectively, and how to avoid some pitfalls.
+      Ordinarily,  project  files  should be created with the /library
+ flag in effect.  In this mode, the information saved in  the  project
+ file  consists of all subprogram declarations, all subprogram invoca-
+ tions not resolved by declarations in the same file, and one instance
+ of  each  COMMON  block  declaration.   This is the minimum amount of
+ information needed to check agreement between files.
+      If the file contains more than one routine, there are some  pos-
+ sible  problems  that  can  arise  from  creating the project file in
+ library mode, because the calling hierarchy  among  routines  defined
+ within  the file is lost.  Also, if the routines in the file make use
+ of COMMON blocks that are shared with routines in other files,  there
+ will  not be enough information saved for the correct checking of set
+ and used status of COMMON blocks and COMMON  variables  according  to
+ the  /usage setting.  Therefore if you plan to use project files when
+ the /usage setting is nonzero (which is the default  situation),  and
+ if  multiple  routines  in  one project file share COMMON blocks with
+ routines in other files, the project files should be created with the
+ /library  flag  turned off.  In this mode, ftnchek saves, besides the
+ information listed above, one invocation of each  subprogram  by  any
+ other subprogram in the same file, and all COMMON block declarations.
+ This means that the project file will be larger than  necessary,  and
+ that  when it is read in, ftnchek may repeat some inter-module checks
+ that it already did when the project file was created.  If each  pro-
+ ject  file  contains only one module, there is no loss of information
+ in creating the project files in library mode.
+      Because of the possible loss of information entailed by creating
+ a  project  file with the /library flag in effect, whenever that pro-
+ ject file is read in later, it will be  treated  as  a  library  file
+ regardless of the current setting of the /library flag.  On the other
+ hand, a project file created with library mode turned off can be read
+ in later in either mode.
+
+
+

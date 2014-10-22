@@ -1,0 +1,49 @@
+
+FTNCHEK Version 2.9 April 1996
+
+File usage.f:
+     11      $ 		(9,9,100)
+             ^
+Possibly misleading appearance near line 11 col 6 file usage.f: Continuation
+ follows comment or blank line
+     19 	implicit double precision (d), real(r)
+Error near line 19 file usage.f: Statement out of order.
+     23 	parameter (Pi = 3.14159265358979D0)
+                              ^
+Warning near line 23 col 23 file usage.f:  dble const truncated to real PI
+     50 		www = 4.7 + (Pi * 2)**8
+                            ^
+Warning near line 50 col 21 file usage.f:  real expr truncated to intg WWW
+     60 	dbl1 = 1.2345
+                     ^
+Warning near line 60 col 14 file usage.f:  real const promoted to dble DBL1 :
+ may not give desired precision
+Warning in module YACCTEST file usage.f:
+   Variables used before set:
+     IUNIT              PAUSE               SAVE               STOP         
+
+   Variables may be used before set:
+      DBL1         
+
+     75 	if( beta ) xray = 1.0D0
+                                ^
+Warning near line 75 col 25 file usage.f:  dble const truncated to intg XRAY
+     81 	if((x-1.0)**(sqrt(2.0))/(5/4+com6) .gt. com3) then
+                                            ^
+Warning near line 81 col 37 file usage.f: integer quotient expr converted to
+ real
+     87 	com4(com2+com6) = com4(xray)
+                     ^
+Warning near line 87 col 14 file usage.f: subscript is not integer
+                                       ^
+Warning near line 87 col 32 file usage.f: subscript is not integer
+Warning in module HOME file usage.f:
+   Variables used before set:
+      COM2         
+
+
+ 1 syntax error detected in file usage.f
+ 11 warnings issued in file usage.f
+
+Common block BLK1:
+  Elements used but never set: COM3 COM6

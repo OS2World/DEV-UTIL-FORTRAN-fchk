@@ -1,0 +1,45 @@
+
+FTNCHEK Version 2.9 April 1996
+
+File intrinstest.f:
+
+      1 	i = max(x,i)
+                        ^
+Error near line 1 col 17: type mismatch between intrinsic function arguments: 
+real X , intg I
+      2 	x = sqrt(y)
+      3 	z = sqrt(i)
+                         ^
+Error near line 3 col 18: illegal argument data type for intrinsic function 
+SQRT : intg I
+      4 	end
+
+Module %MAIN: prog
+
+External subprograms referenced:
+
+       MAX: intrns       SQRT: intrns 
+
+Variables:
+ 
+      Name Type Dims     Name Type Dims     Name Type Dims     Name Type Dims
+         I intg*            X real*            Y real*            Z real*  
+
+* Variable not declared. Type has been implicitly defined.
+
+
+Warning: Variables set but never used:
+         Z         
+
+Warning: Variables used before set:
+         Y         
+
+Warning: Variables may be used before set:
+         I                  X         
+
+
+Nonportable usage: File contains tabs
+
+ 2 syntax errors detected in file intrinstest.f
+ 5 warnings issued in file intrinstest.f
+

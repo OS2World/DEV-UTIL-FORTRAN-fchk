@@ -1,0 +1,27 @@
+	       Ftnchek Version 2.9 alpha, patch Level 3
+			    February 1996
+
+Changes made Patch 2:
+	o Add (void) casts to strcpy et al in ftnchek.c
+	o Fix bug in use of strncpy in set_option in ftnchek.c
+
+Changes made in Patch 3:
+	o New warning: statement function defined but not used.
+	o Fix bug in maintaining warning count in plsymtab.c
+	o Add -warn/nowarn setting to control all f77 warnings
+	  individually.
+	o Replace -tab switch with -source setting.  New setting
+	  includes control of both DEC tabs and VMS syntax of INCLUDE
+	  statement (defaulting extension, /LIST qualifier).
+	o New setting -intrinsic to control recognition of nonstandard
+	  intrinsics and syntax of RAND, IARGC.
+	o New flag -version.
+	o New make check target: checkrc
+	o Add summary "succeeded" or "failed" to make check.
+
+Changes made in Patch 4:
+	o Remove -warn/nowarn and use -f77=list instead.  Change a
+	  few of the keywords to be more rememberable.
+	o Change configure.in to use AC_CANONICAL_HOST instead of
+	  uname and arch.
+

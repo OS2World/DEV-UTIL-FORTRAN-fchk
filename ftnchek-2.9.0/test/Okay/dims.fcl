@@ -1,0 +1,31 @@
+
+FTNCHEK Version 2.9 April 1996
+Cannot open file nosuch.f
+
+File dims.f:
+     13      $     :ichar(str("won""t",40) (1:1))) = 'x'
+                              ^
+Warning near line 13 col 23 file dims.f: Nonstandard syntax : character string
+ should be delimited by apostrophes
+Error in file dims.f: STR3 cannot be adjustable size in module FOO
+Warning in module FOO file dims.f:
+   Variables declared but never referenced:
+         B                  D*              STR2               STR3         
+      STR4         
+  * Dummy argument
+
+   Variables set but never used:
+         C         
+
+   Variables may be used before set:
+         A         
+
+
+ 1 syntax error detected in file dims.f
+ 4 warnings issued in file dims.f
+
+No main program found
+Common block XX: unused
+Subprogram STR never defined
+    invoked in module FOO line 13 file dims.f
+    (possibly it is an array which was not declared)

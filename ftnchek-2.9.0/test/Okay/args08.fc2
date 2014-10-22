@@ -1,0 +1,13 @@
+
+FTNCHEK Version 2.9 April 1996
+
+File args08.f:
+ 0 syntax errors detected in file args08.f
+Subprogram SUBA:  argument mismatch
+  at position 1:
+    Dummy arg C is type char*2(100) in module SUBA line 5 file args08.f
+    Actual arg C is type char*1(100) in module %MAIN line 3 file args08.f
+Subprogram SUBA:  argument arrayness mismatch
+  at position 1:
+    Dummy arg C has 1 dim size 100*2 in module SUBA line 5 file args08.f
+    Actual arg C has 2 dims size 100*1 in module %MAIN line 3 file args08.f

@@ -1,0 +1,12 @@
+C====>Begin Module %MAIN      File t208q.f        All variables
+C
+C     Parameter variables
+C
+      INTEGER             MAXTOK
+      PARAMETER           (MAXTOK = 10)
+C
+C     Local variables
+C
+      CHARACTER*10        TOKL10,      TOKLMX
+C
+C====>End Module   %MAIN      File t208q.f     

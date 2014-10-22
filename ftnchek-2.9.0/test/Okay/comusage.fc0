@@ -1,0 +1,7 @@
+
+FTNCHEK Version 2.9 April 1996
+
+File comusage.f:
+ 0 syntax errors detected in file comusage.f
+Common block %BLANK: No elements are set, but some are used.
+Common block ZAP: unused

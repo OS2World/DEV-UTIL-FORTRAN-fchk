@@ -1,0 +1,19 @@
+c====>Begin Module %MAIN      File t208p.f        All variables
+c
+c     External functions
+c
+      EXTERNAL            EX
+c
+      INTEGER             IABS
+c
+      REAL                EX
+c
+c     Statement functions
+c
+      INTEGER             IN
+c
+c     Local variables
+c
+      INTEGER             IARG
+c
+c====>End Module   %MAIN      File t208p.f     

@@ -1,0 +1,106 @@
+
+FTNCHEK Version 2.9 April 1996
+
+File assign.f:
+
+      1 c  for testing propagation of type sizes
+      2       subroutine sizeprop(cadj,i,x)
+      3       character cadj*(*)
+      4       character c1, c5*5, c10*10
+      5       c1 = c5
+      6       c5 = c1
+      7       c5 = cadj
+      8       cadj = c5
+      9       c5 = 'hello'
+     10       c5 = 5Hhello
+                 ^
+Error near line 10 col 10: type mismatch: holl*5 const assigned to char*5 C5
+     11       c5 = 11Hhello there
+                 ^
+Error near line 11 col 10: type mismatch: holl*11 const assigned to char*5 C5
+     12       end
+
+Warning in module SIZEPROP file assign.f:
+   Variables declared but never referenced:
+       C10                  I*                 X*        
+  * Dummy argument
+
+   Variables may be used before set:
+        C5         
+
+
+     13       integer i,j,n
+     14       integer*4 m
+     15       parameter (n=6)
+     16       parameter (m=7)
+     17       real x,y
+     18       integer*2 i2
+     19       integer*4 i4
+     20       logical L
+     21       logical*2 L2
+     22       logical*4 L4
+     23       double precision d
+     24       real*4 r4
+     25       real*8 r8
+     26       complex c
+     27       real*16 r16
+     28       double complex z
+     29       complex*16 c16
+     30       complex*32 c32
+     31       i = m
+     32       i = n
+     33       i = 1
+     34       i = i2
+     35       i = i4
+     36       i4 = i
+     37       i4 = i2
+     38       i2 = i4
+     39       i = 4habcd
+     40       i = 8habcdefgh
+     41       x = r4
+     42       x = r8
+     43       x = c
+     44       d = x
+     45       x = d
+     46       z = d
+     47       d = z
+     48       r16 = d
+     49       r16 = r8
+     50       d = r4
+     51       d = r8
+     52       d = r16
+     53       c = x
+     54       c = z
+     55       i = L4
+                ^
+Error near line 55 col 9: type mismatch: logl*4 L4 assigned to intg I
+     56       call sizeprop('hello',i2,r16)
+     57       end
+
+Warning in module %MAIN file assign.f:
+   Variables declared but never referenced:
+       C16                C32                  J                  L         
+        L2                  Y         
+
+   Variables used before set:
+        L4                 R4                 R8         
+
+   Variables may be used before set:
+         C                 I2                 I4         
+
+
+
+ 3 syntax errors detected in file assign.f
+ 5 warnings issued in file assign.f
+
+Subprogram SIZEPROP:  argument data type mismatch
+  at position 2:
+    Dummy arg I is type intg  in module SIZEPROP line 2 file assign.f
+    Actual arg I2 is type intg*2  in module %MAIN line 56 file assign.f
+  at position 3:
+    Dummy arg X is type real  in module SIZEPROP line 2 file assign.f
+    Actual arg R16 is type real*16  in module %MAIN line 56 file assign.f
+Subprogram SIZEPROP:  argument usage mismatch
+  at position 1:
+    Dummy arg CADJ is modified in module SIZEPROP line 2 file assign.f
+    Actual arg 'hello' is const or expr in module %MAIN line 56 file assign.f

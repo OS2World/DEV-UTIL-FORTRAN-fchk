@@ -1,0 +1,1 @@
+-common:3 -nof77 -port -quiet comcmp.f -ref

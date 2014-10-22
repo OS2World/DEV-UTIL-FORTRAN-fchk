@@ -1,0 +1,207 @@
+dnl configure.in   Process with autoconf to produce a configure script.
+dnl  This autoconf input file is for ftnchek version 2.9, April 1996
+
+AC_INIT(ftnchek.c)
+
+AC_CANONICAL_HOST
+
+dnl Look for yacc or bison. If bison, then -y used, so don't need
+dnl to worry about YSTEM. (but what if it finds byacc?)
+
+AC_PROG_YACC
+if test -z "$YACC"; then  
+   AC_MSG_WARN([Didn't find yacc or bison])
+fi
+
+dnl Look for mawk/nawk/awk:
+
+AC_PROG_AWK
+if test $AWK = awk; then
+   case $host_os in
+   aix*)
+      AC_MSG_WARN([This awk might not work in dcl2inc. Need gawk or nawk]) ;;
+   esac
+fi
+
+dnl Check for gcc/cc
+
+AC_PROG_CC
+
+dnl Check for floating point option (really on applies to Suns, I
+dnl think, and probably only Solaris at that).
+
+AC_CHECK_PROGS(FPVERSION,fpversion)
+if test "$FPVERSION" ; then
+  AC_MSG_CHECKING([for a floating point option])
+  CG_FLAG=`$FPVERSION -foption`
+  if test "CG_FLAG"; then CG_FLAG=-$CG_FLAG; fi
+  AC_MSG_RESULT([ $CG_FLAG ])
+fi
+
+dnl Check for nroff
+
+AC_CHECK_PROGS(NROFF,nroff)
+if test -n "$NROFF" ; then
+    HAS_NROFF='true'
+else
+  AC_CHECK_PROGS(NROFF,groff)
+if test -n "$NROFF" ; then
+    HAS_NROFF='true'
+  else
+    HAS_NROFF='false'
+    NROFF='false'
+  fi
+fi
+
+dnl Look for man-to-ps filter.  Take groff if present but settle for others.
+
+AC_CHECK_PROGS(TROFF,groff)
+if test -n "$TROFF" ; then
+    MANtoPS="$TROFF -man"
+else
+  AC_CHECK_PROGS(TROFF,psroff)
+  if test -n "$TROFF" ; then
+    MANtoPS="$TROFF -t -man"
+  else
+dnl		Solaris 2.1
+    if test -x /usr/lib/lp/postscript/dpost ; then
+       MANtoPS='troff -man | /usr/lib/lp/postscript/dpost'
+    else
+dnl		Nothing found: say groff and let them figure it out.
+       MANtoPS='groff -man'
+    fi
+  fi
+fi
+
+dnl Look for strip.  If not, use a harmless substitute
+
+AC_CHECK_PROGS(STRIP,strip)
+STRIP=${STRIP-'echo >/dev/null'}
+
+
+dnl See if col is on the path.  If not, it may be BSD-like and user may
+dnl not have /usr/5bin on path.
+
+AC_CHECK_PROGS(COL,col)
+if test -n "$COL" ; then
+   COL="$COL -bx"
+else
+   AC_MSG_CHECKING([for /usr/5bin/col])
+   if test -x /usr/5bin/col ; then
+      AC_MSG_RESULT([found it])
+      COL='/usr/5bin/col -bx'
+   else
+      AC_MSG_RESULT([col not found -- using cat instead])
+      COL=cat
+   fi
+fi
+
+dnl  Most systems have sed in /bin, but linux puts it in /usr/bin.
+AC_MSG_CHECKING([where sed is located])
+if test -r /bin/sed ; then
+     SED='/bin/sed'
+else
+   if test -r /usr/bin/sed ; then
+     SED='/usr/bin/sed'
+   else
+     SED='sed'
+   fi
+fi
+AC_MSG_RESULT([$SED])
+
+
+dnl Set compiler options depending on operating system:
+
+dnl Here's the place to tweak compiler settings, not in 
+dnl Makefile.in, (and certainly not in Makefile!)
+
+
+INSTALL_MAN='install-man'
+case $host_os in
+  aix*)
+    if test -z "$GCC"; then
+      if test "$CC" = cc ; then
+        CC=c89
+      fi
+      OS_FLAGS="-DAIXC -D_BSD -O"
+    else
+        OS_FLAGS="-D_BSD -O"
+    fi;;
+  hpux*)
+    if test -z "$GCC"; then
+      if test "$CC" = cc ; then
+        CC=c89
+      fi
+      OS_FLAGS="-D_BSD +O2 +Onolimit"
+    else
+      OS_FLAGS="-D_BSD -O"
+    fi;;
+  irix*)
+    OS_FLAGS="-D_BSD -O2"
+    INSTALL_MAN='install-man-sgi';;
+  linux*)
+changequote(<<, >>)dnl
+    if echo $host_cpu | grep 'i[^3]86' >/dev/null 2>&1 ; then
+      OS_FLAGS="-D_BSD -O -m486";
+    else
+      OS_FLAGS="-D_BSD -O";
+    fi;;
+changequote([, ])dnl
+  next*)
+    OS_FLAGS="-D_BSD -O2";;
+  osf*) 
+    if test -z "$GCC"; then 
+      OS_FLAGS="-ieee_with_inexact -O -Olimit 1000"
+    else
+       OS_FLAGS="-D_BSD -O"
+    fi;;
+  sunos*)
+    OS_FLAGS="-D_BSD -O2";;
+  solaris*)
+    cpucc="$host_cpu"-"$CC"
+    case $cpucc in
+       sparc-cc) OS_FLAGS="-D_BSD -Xc -xO4 $CG_FLAG";;
+       *gcc) OS_FLAGS="-D_BSD -O2";;
+       *cc)  OS_FLAGS="-D_BSD -O";; 
+    esac;;
+  ultrix*)
+    OS_FLAGS="-D_BSD -O2 -Olimit 1000";;
+  *)
+    AC_MSG_WARN([Operating system not determined. Using generic flags.])
+    OS_FLAGS="-D_BSD -O";;
+esac
+
+AC_MSG_CHECKING([whether $CC accepts function prototypes])
+dnl the test prog includes specific code that chokes some compilers
+AC_CACHE_VAL(ac_cv_prog_CC_protos,[
+AC_TRY_COMPILE([],
+  [extern int foo(int arg); /* basic prototype */
+   static int (*ii_fun[]) ( int *args )={ 0, };],
+  ac_cv_prog_CC_protos=yes,ac_cv_prog_CC_protos=no)])
+AC_MSG_RESULT([$ac_cv_prog_CC_protos])
+if test $ac_cv_prog_CC_protos = yes ; then
+   PROTOFLAG=""
+else
+   PROTOFLAG="-DNO_PROTOTYPES"
+fi
+
+CFLAGS="-DUNIX -DLARGE_MACHINE $OS_FLAGS $PROTOFLAG"
+AC_MSG_RESULT([Compile command is $CC $CFLAGS])
+if test $GCC; then
+AC_MSG_RESULT([If you prefer using cc, setenv CC cc; rm config.cache and re-run])
+fi
+
+AC_SUBST(YACC)
+AC_SUBST(AWK)
+AC_SUBST(NROFF)
+AC_SUBST(MANtoPS)
+AC_SUBST(STRIP)
+AC_SUBST(COL)
+AC_SUBST(SED)
+AC_SUBST(CC)
+AC_SUBST(CFLAGS)
+AC_SUBST(INSTALL_MAN)
+AC_SUBST(HAS_NROFF)
+AC_OUTPUT( Makefile test/Makefile )
+
+dnl  Acknowledgement and thanks to Judah Milgram for help producing this file.

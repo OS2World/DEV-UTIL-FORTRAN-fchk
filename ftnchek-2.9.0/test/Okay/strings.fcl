@@ -1,0 +1,18 @@
+
+FTNCHEK Version 2.9 April 1996
+
+File strings.f:
+      4       S = '12345678901234567890123456789012345678901234567890123456789012
+                                                                                ^
+Possibly misleading appearance near line 4 col 73 file strings.f: characters
+ past 72 columns
+      7       T = '12345678901234567890123456789012345678901234567890123456789012
+                                                                                ^
+Possibly misleading appearance near line 7 col 73 file strings.f: characters
+ past 72 columns
+     16      $'12345678901234567890123456789012345678901234567890123456789012'
+Error near line 16 file strings.f: parse error
+
+ 1 syntax error detected in file strings.f
+ 2 warnings issued in file strings.f
+

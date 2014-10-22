@@ -1,0 +1,105 @@
+This is the OS/2 2.x recompile of Ftnchek, version 2.9.0.
+Indeed, I can't call it a port since Robert Moniot (the author of
+ftncheck) wrote it in a portable fashion, so that it just recompiles under
+Eberhard Mattes' emx environment w/o any complaints. See the original
+'readme' file.
+
+
+The OS/2 2.x recompile can be found on the usual sites:
+
+
+fchk290s.zip          --- sources
+fchk290b.zip          --- binaries
+
+ftp-os2.cdrom.com: (CD-ROM)
+
+now:        /os2/incoming/
+move to:    /os2/dev32/
+
+ftp-os2.nmsu.edu:  (HOBBES)
+
+now:        /incoming/
+move to:    /os2/dev32/
+
+
+A brief intro:
+==============
+
+ftnchek is a free Fortran syntax checker (some say, similar to
+a commercial product called FLINT, which I don't know). It allows
+to catch all kinds of problems Fortran is (in)famouse for: unassigned
+variables, type casts, too long lines, wrong number / type of arguments
+in calles to functions/subroutines etc. It can catch lots of problems
+many Fortran compilers seem to fail finding.
+To cut it short, it helps do what a normal Pascal compiler would do 
+by itself on Pascal, for those of us who (still) need to use Fortran.
+Read the docs to learn more.
+
+
+The OS/2 port:
+==============
+
+It is now not a port anymore since OS/2 is a supported target in the
+original distribution.  The original sources have been obtained
+from ftp://ftp.dsm.fordham.edu/pub/ on 25-Apr-96 as a *.tar.gz file.
+I took the liberty to repackage them in a *.zip file for the people
+without tar / gzip on their machines, or even for the last few people
+not using the silly DOS 8.3 FAT file system under OS/2 instead of HPFS.
+
+
+
+The second archive includes two binaries, 
+'ftnchek.exe' and 'ftnchekS.exe'. 
+* 'ftnchek.exe' needs the 'emx09b / emxfix03' runtime system to work  
+  (can be found as emxrt.zip on many ftp sites, including hobbes 
+  (ftp-os2.nmsu.edu) and cdrom (ftp-os2.cdrom.com)). Make sure to have 
+  emx.dll in a directory in your LIBPATH.
+* 'ftnchekS.exe' can be used w/o having emxrt installed. This binary is 
+  slightly smaller this time.
+
+All I did was: 
+1) compiled it with gcc 2.7.2 / emx09b + emxfix03, using
+     copy makefile.os2 makefile
+     make OS2noemx
+     make OS2emx
+2) put the binaries, makefile, some docs in this archive
+3) upload the whole thing due to request in two packages, the
+   sources and the binaries with docs.
+
+Installation: 
+=============
+
+1) If you are using an older version of ftnchek make a backup copy first!
+   Now put the binary 'ftnchek.exe' or 'ftnchekS.exe' in a directory in
+   your PATH. Of course, you can rename 'ftnchekS.exe' to 'ftnchek.exe'
+   if you wish. I fyou use the original 'ftnchek.exe' make sure to have
+   emx.dll installed as discussed above.
+
+2) If you have a postscript printer you may wish to print the file 
+   'ftnchek.ps'.  If you have GNU man installed, you may wish to move the 
+   file 'ftnchek.man' onto a file 'ftnchek.1' in your man/man1
+   directory. If you have neither nor read the file 'ftnchek.doc'
+
+3) Use it.
+
+As always: The progamme is distributed as is, no warranties are given or
+implied in any way. Use at your own risk; if it kills your cat -- too bad. 
+All the copyrights or -lefts of the original distribution apply. Check there.
+
+Bug reports to the original author, please, unless they are clearly
+a 'feature' of the os/2 port. (I don't know what I can do then, since all
+I did was a re-compile anyway).
+
+Chocolates to Robert Moniot (ftnchek), Eberhard Mattes (emx) and the other
+gcc people, and if some are left, as always, I'll take a bite.
+
+Read the files 'README', 'readme.os2', 'os2port.txt', and of course
+the documention of 'ftnchek' for more information. ('os2port.txt' is
+just included for historical reasons and documents the port done for
+ftnchek 2.8.4.)
+
+That's it. Have fun.            Stefan A. Deutscher ,  26-Apr-1996
+
+                          sad@utk.edu / stefand@elphy.irz.hu-berlin.de
+
+

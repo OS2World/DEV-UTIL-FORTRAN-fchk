@@ -1,0 +1,13 @@
+C====>Begin Module FOO        File t208i.f        All variables
+C
+C     External functions
+C
+      EXTERNAL            R1MACH
+C
+      DOUBLE PRECISION    R1MACH
+C
+C     Argument variables
+C
+      REAL                X
+C
+C====>End Module   FOO        File t208i.f     

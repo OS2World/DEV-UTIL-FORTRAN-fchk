@@ -1,0 +1,49 @@
+# Borland C version of Makefile for Fortran program checker
+#  (Copy this to makefile prior to running make.)
+# makefile produced with help from: Gary Bastin gbastin@x102c.ess.harris.com
+#
+#  NOTE: due to large number of .obj files, the link command cannot
+#  name all of them, so it links "*.obj".  Therefore, make in a
+#  directory with no extraneous .obj files.
+#
+#  Name of C compiler
+CC=bcc
+#  Name of directory where WILDARGS.OBJ is located
+CLIB=C:\BORLANDC\LIB
+
+#  Command to execute to make .obj file from .c file
+.c.obj:
+	$(CC) -c $(CFLAGS) $(OPTIONS) $<
+
+# If your machine has less than 640K RAM, you may want to use this
+# to declare smaller data areas.
+OPTIONS= -DSMALL_MACHINE
+#OPTIONS=
+
+# None of the following flags should be altered.  Choose additional options
+# by modifying OPTIONS above instead.
+# -O: optimize.  -A: do not use C++ keywords.  -w-pro: do not warn about
+# missing prototypes.  -mh: use the huge memory model.
+CFLAGS=  -O -A -w-pro -mh
+
+OBJS= ftnchek.obj forlex.obj fortran.obj plsymtab.obj pgsymtab.obj \
+ symtab.obj exprtype.obj project.obj
+
+ftnchek: $(OBJS)
+	$(CC) -eftnchek.exe -mh *.obj $(CLIB)\wildargs.obj
+
+ftnchek.obj: ftnchek.h
+
+forlex.obj: ftnchek.h keywords.h symtab.h tokdefs.h
+
+fortran.obj: ftnchek.h symtab.h fortran.c
+
+pgsymtab.obj: ftnchek.h symtab.h
+
+plsymtab.obj: ftnchek.h symtab.h
+
+symtab.obj: ftnchek.h symtab.h intrins.h
+
+exprtype.obj: ftnchek.h symtab.h tokdefs.h
+
+project.obj: ftnchek.h symtab.h

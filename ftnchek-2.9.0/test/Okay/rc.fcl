@@ -1,0 +1,98 @@
+
+FTNCHEK Version 2.9 April 1996
+
+File do_enddo.f:
+
+      4       do i=1,100
+              ^
+Warning near line 4 col 7: Nonstandard syntax
+      6       enddo
+              ^
+Warning near line 6 col 7: Nonstandard syntax
+      7       print *,sum  !@#$*&
+                           ^
+Warning near line 7 col 20: Nonstandard syntax : inline comment
+     10       do while(other_sum .lt. 2000)
+              ^
+Warning near line 10 col 7: Nonstandard syntax
+     13 ! here we have a nonstandard comment
+        ^
+Warning near line 13 col 1: Nonstandard syntax : inline comment
+     12       end do
+              ^
+Warning near line 12 col 7: Nonstandard syntax
+     15       dowhile ( x .ne. (1,2))
+              ^
+Warning near line 15 col 7: Nonstandard syntax
+     17       end do
+              ^
+Warning near line 17 col 7: Nonstandard syntax
+
+Module ABC: subr
+
+Variables:
+ 
+      Name Type Dims     Name Type Dims     Name Type Dims     Name Type Dims
+         I intg*    OTHER_SUM real*          SUM real*            X real*  
+
+* Variable not declared. Type has been implicitly defined.
+
+
+Warning: Variables may be used before set:
+         X         
+
+
+     19       include 'average.f'
+              ^
+Warning near line 19 col 7: Nonstandard syntax
+Including file average.f:
+     16             COMPAV = SUM/COUNT
+                           ^
+Warning near line 16 col 20 file average.f: integer quotient expr converted to
+ real
+
+Module COMPAV: func: real
+
+Variables:
+ 
+      Name Type Dims     Name Type Dims     Name Type Dims     Name Type Dims
+    COMPAV real         COUNT intg             I intg*            J intg   
+     SCORE intg  1        SUM intg   
+
+* Variable not declared. Type has been implicitly defined.
+
+
+Warning: Variables may be used before set:
+       SUM         
+
+
+
+Module AVENUM: prog
+
+External subprograms referenced:
+
+    COMPAV: real*  
+
+Variables:
+ 
+      Name Type Dims     Name Type Dims     Name Type Dims     Name Type Dims
+       AVG real         COUNT intg             I intg        MAXNOS intg*  
+      NUMS real  1
+
+* Variable not declared. Type has been implicitly defined.
+
+
+Warning: Variables set but never used:
+       AVG         
+
+
+
+ 0 syntax errors detected in file do_enddo.f
+ 16 warnings issued in file do_enddo.f
+
+Subprogram ABC never invoked
+    defined in module ABC line 2 file do_enddo.f
+Subprogram COMPAV:  argument data type mismatch
+  at position 1:
+    Dummy arg SCORE is type intg  in module COMPAV line 10 file average.f (included at line 19 in do_enddo.f)
+    Actual arg NUMS is type real  in module AVENUM line 43 file average.f (included at line 19 in do_enddo.f)

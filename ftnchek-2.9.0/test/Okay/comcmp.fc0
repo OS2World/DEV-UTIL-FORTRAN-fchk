@@ -1,0 +1,13 @@
+
+FTNCHEK Version 2.9 April 1996
+
+File comcmp.f:
+     33       c7 = c1//c8
+                 ^
+Warning near line 33 col 10 file comcmp.f:  char*9 expr truncated to char*7 C7
+
+ 0 syntax errors detected in file comcmp.f
+ 1 warning issued in file comcmp.f
+
+Common block INTS: unused
+Common block BK1: unused

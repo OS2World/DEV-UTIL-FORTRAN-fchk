@@ -1,0 +1,13 @@
+c====>Begin Module FOO        File t208g.f        All variables
+c
+c     External functions
+c
+      EXTERNAL            I1MACH
+c
+      INTEGER             I1MACH
+c
+c     Local variables
+c
+      INTEGER             N
+c
+c====>End Module   FOO        File t208g.f     

@@ -1,0 +1,66 @@
+
+FTNCHEK Version 2.9 April 1996
+
+File do_enddo.f:
+      4       do i=1,100
+              ^
+Warning near line 4 col 7 file do_enddo.f: Nonstandard syntax
+      6       enddo
+              ^
+Warning near line 6 col 7 file do_enddo.f: Nonstandard syntax
+      7       print *,sum  !@#$*&
+                           ^
+Warning near line 7 col 20 file do_enddo.f: Nonstandard syntax : inline
+ comment
+     10       do while(other_sum .lt. 2000)
+              ^
+Warning near line 10 col 7 file do_enddo.f: Nonstandard syntax
+     13 ! here we have a nonstandard comment
+        ^
+Warning near line 13 col 1 file do_enddo.f: Nonstandard syntax : inline
+ comment
+     12       end do
+              ^
+Warning near line 12 col 7 file do_enddo.f: Nonstandard syntax
+     15       dowhile ( x .ne. (1,2))
+              ^
+Warning near line 15 col 7 file do_enddo.f: Nonstandard syntax
+     17       end do
+              ^
+Warning near line 17 col 7 file do_enddo.f: Nonstandard syntax
+Warning in module ABC file do_enddo.f:
+   Variables may be used before set:
+         X         
+
+   Names longer than 6 chars (nonstandard):
+ OTHER_SUM         
+
+   Names containing nonstandard characters
+ OTHER_SUM         
+
+     19       include 'average.f'
+              ^
+Warning near line 19 col 7 file do_enddo.f: Nonstandard syntax
+Including file average.f:
+     16             COMPAV = SUM/COUNT
+                           ^
+Warning near line 16 col 20 file average.f: integer quotient expr converted to
+ real
+Warning in module COMPAV file average.f:
+   Variables may be used before set:
+       SUM         
+
+Warning in module AVENUM file average.f:
+   Variables set but never used:
+       AVG         
+
+
+ 0 syntax errors detected in file do_enddo.f
+ 15 warnings issued in file do_enddo.f
+
+Subprogram ABC never invoked
+    defined in module ABC line 2 file do_enddo.f
+Subprogram COMPAV:  argument data type mismatch
+  at position 1:
+    Dummy arg SCORE is type intg  in module COMPAV line 10 file average.f (included at line 19 in do_enddo.f)
+    Actual arg NUMS is type real  in module AVENUM line 43 file average.f (included at line 19 in do_enddo.f)

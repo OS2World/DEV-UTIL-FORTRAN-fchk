@@ -1,0 +1,12 @@
+
+FTNCHEK Version 2.9 April 1996
+
+File backslash.f:
+      9       c = c// "don't"
+                ^
+Warning near line 9 col 9 file backslash.f:  char*105 expr 
+truncated to char*100 C
+
+ 0 syntax errors detected in file backslash.f
+ 1 warning issued in file backslash.f
+

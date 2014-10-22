@@ -1,0 +1,462 @@
+
+
+
+FTNCHEK 2.9(1L)                                   FTNCHEK 2.9(1L)
+
+
+NAME
+        ftnchek - Fortran 77 program checker
+
+
+SYNOPSIS
+       ftnchek [ -arguments[=num] ] [ -array[=num] ]
+            [ -calltree[=num] ] [ -[no]check ] [ -columns[=num] ]
+            [ -common[=num] ] [ -[no]crossref ] [ -[no]declare ]
+            [ -[no]division ] [ -[no]extern ] [ -[no]f77[=str] ]
+            [ -[no]help ] [ -include=str ] [ -intrinsic[=num] ]
+            [ -[no]library ] [ -[no]list ] [ -makedcls[=num] ]
+            [ -[no]novice ] [ -output=str ]
+            [ -[no]portability[=str] ] [ -[no]pretty[=str] ]
+            [ -[no]project ] [ -[no]pure ] [ -[no]quiet ]
+            [ -[no]reference ] [ -[no]resources ]
+            [ -[no]sixchar ] [ -[no]sort ] [ -source[=num] ]
+            [ -[no]symtab ] [ -[no]truncation[=str] ]
+            [ -usage[=num] ] [ -[no]vcg ] [ -[no]version ]
+            [ -[no]volatile ] [ -wordsize[=num] ] [ -wrap[=num] ]
+            [ files ...  ]
+
+
+DESCRIPTION
+
+
+       ftnchek  (short for Fortran checker) is designed to detect
+       certain errors in a Fortran program that a  compiler  usu-
+       ally  does  not.   ftnchek  is  not  primarily intended to
+       detect syntax errors.  Its purpose is to assist  the  user
+       in  finding semantic errors.  Semantic errors are legal in
+       the Fortran language but are wasteful or may cause  incor-
+       rect  operation.   For  example, variables which are never
+       used may indicate some omission in the program; uninitial-
+       ized  variables  contain garbage which may cause incorrect
+       results to be calculated;  and  variables  which  are  not
+       declared  may  not  have  the  intended  type.  ftnchek is
+       intended to assist users in the debugging of their Fortran
+       program.   It  is not intended to catch all syntax errors.
+       This is the function of  the  compiler.   Prior  to  using
+       ftnchek,  the user should verify that the program compiles
+       correctly.
+
+
+INVOKING FTNCHEK
+        ftnchek is invoked through a command of the form:
+
+        $ ftnchek [-option -option ...] filename [filename ...]
+
+       The brackets indicate something which  is  optional.   The
+       brackets  themselves are not actually typed.  Here options
+       are command-line switches or settings, which  control  the
+       operation  of  the  program  and the amount of information
+       that will be printed out.  If no option is specified,  the
+       default  action  is to print error messages, warnings, and
+
+
+
+                            4 Apr 1996                          1
+
+
+
+
+
+FTNCHEK 2.9(1L)                                   FTNCHEK 2.9(1L)
+
+
+       informational messages, but not  the  program  listing  or
+       symbol tables.
+
+
+       Each option begins with the '-' character.  (On VAX/VMS or
+       MS-DOS systems you  may  use  either  '/'  or  '-'.)   The
+       options  are  described at greater length in the next sec-
+       tion.
+
+       ftnchek options fall into two categories: switches,  which
+       are  either  true  or  false,  and  settings, which have a
+       numeric or string value.  The name of a switch is prefixed
+       by  'no'  to  turn it off: e.g. -nopure would turn off the
+       warnings about impure functions. The 'no' prefix can  also
+       be  used with numeric settings, having the effect of turn-
+       ing off the corresponding warnings.  Settings that control
+       lists  of  warnings have a special syntax discussed below.
+       Only the first 3 characters of an option name (not  count-
+       ing  the  '-')  need  be provided.  A colon may be used in
+       place of an equals sign  for  numeric  or  string  setting
+       assignments;  however,  we  show only the equals sign form
+       below.
+
+
+       The switches and settings which ftnchek  currently  recog-
+       nizes are:
+
+       -arguments=num
+              Set  level  of  strictness  in  checking subprogram
+              arguments.  Min is 0 (no checking).  Max is 3 (most
+              checking).  Default = turn-on = 3.
+
+       -array=num
+              Set level of strictness in checking array arguments
+              of subprograms.  Min is 0 (least strict).  Max is 3
+              (most strict).  Default = turn-on = 3.
+
+       -calltree=num
+              Produce  subprogram call hierarchy in one of 3 for-
+              mats.  Default = 0, no tree.  Turn-on  =  1,  call-
+              tree format.  Other values are 2, who-calls-who and
+              3, VCG.
+
+       -check Perform checking.  Default = yes.
+
+       -columns=num
+              Set maximum line length  to  num  columns.  (Beyond
+              this  is ignored.)  Turn-on = max = 132.  Default =
+              72.
+
+       -common=num
+              Set level of strictness in checking COMMON  blocks.
+              Min  is 0 (no checking).  Max is 3 (must be identi-
+              cal).  Default = turn-on = 3.
+
+
+
+                            4 Apr 1996                          2
+
+
+
+
+
+FTNCHEK 2.9(1L)                                   FTNCHEK 2.9(1L)
+
+
+       -crossref
+              Print cross-reference list of subprogram calls  and
+              COMMON block use.  Default = no.
+
+       -declare
+              Print  a  list of all identifiers whose datatype is
+              not explicitly declared.  Default = no.
+
+       -division
+              Warn wherever division is done (except division  by
+              a constant).  Default = no.
+
+       -extern
+              Warn  if external subprograms which are invoked are
+              never defined.  Default = yes.
+
+       -f77=list
+              Control specific warnings  about  supported  exten-
+              sions to the Fortran 77 Standard.  Default  = none.
+
+       -help  Print command summary.  Default = no.
+
+       -include=path
+              Define a directory to  search  for  INCLUDE  files.
+              Cumulative.
+
+       -intrinsic=num
+              Control  treatment  of  nonstandard intrinsic func-
+              tions.  Three digits.  Max = 223.  Default =  turn-
+              on = 222 for Unix version, 223 for VMS version, 221
+              for others.
+
+       -library
+              Begin library mode: do not warn  about  subprograms
+              in file that are defined but never used.  Default =
+              no.
+
+       -list  Print source listing of program.  Default = no.
+
+       -makedcls=num
+              Prepare a file of declarations.  Min is 0 (no  dec-
+              laration file).  Max is 1023.  Default = 0, turn-on
+              = 1.
+
+       -novice
+              Give output suitable for novice users.   Default  =
+              yes.
+
+       -output=filename
+              Send  output to the given file.  Default is to send
+              output to the screen. (Default  filename  extension
+              is .lis).
+
+
+
+
+
+                            4 Apr 1996                          3
+
+
+
+
+
+FTNCHEK 2.9(1L)                                   FTNCHEK 2.9(1L)
+
+
+       -portability=list
+              Warn about non-portable usages.  Default = none.
+
+       -pretty=list
+              Give warnings for possibly misleading appearance of
+              source code.    Default = all.
+
+       -project
+              Create  project  file  (see   explanation   below).
+              Default = no.
+
+       -pure  Assume  functions  are  pure,  i.e.  have  no  side
+              effects.  Default = yes.
+
+       -quiet Produce less verbose output.  Default = no.
+
+       -reference
+              Print table of subprograms referenced by each  sub-
+              program.  Default = no.
+
+       -resources
+              Print  amount  of  resources  used in analyzing the
+              program.  Default = no.
+
+       -sixchar
+              List any variable names which clash at 6 characters
+              length.  Default = no.
+
+       -sort  Print  list  of  subprograms sorted in prerequisite
+              order.  Default = no.
+
+       -source=num
+              Select source formatting options.  Sum of 1 for DEC
+              Fortran   tab-formatted   lines,  2  for  VMS-style
+              INCLUDE statement, and 4 for  UNIX-style  backslash
+              escape sequences.  Default = 0.  Turn-on = max = 7.
+
+       -symtab
+              Print symbol table for each subprogram.  Default  =
+              no.
+
+       -truncation=list
+              Check  for possible loss of accuracy by truncation.
+              Default = all.
+
+       -usage=num
+              Control  warnings  about  unused  variables,   etc.
+              Three  digits: 1st digit = subprograms, 2nd digit =
+              common, 3rd digit  =  local  variables.   For  each
+              digit:  min  is  0  (no  checking).  Max is 3 (most
+              checking).  Default = turn-on = 333.
+
+       -vcg   Produce VCG format of call graph.
+
+
+
+
+                            4 Apr 1996                          4
+
+
+
+
+
+FTNCHEK 2.9(1L)                                   FTNCHEK 2.9(1L)
+
+
+       -version
+              Print version number.  Default = no.
+
+       -volatile
+              Assume COMMON blocks lose definition between  acti-
+              vations.  Default = no.
+
+       -wordsize=num
+              Set the default word size for numeric quantities to
+              num bytes.  Default = turn-on = 4 bytes.
+
+       -wrap=num
+              Set output column at which to wrap long error  mes-
+              sages  and warnings to the next line.  If set to 0,
+              turn off wrapping.  Default = turn-on = 79.
+
+
+       When more than one option is used, they  should  be  sepa-
+       rated  by  a  blank  space,  except on systems such as VMS
+       where options begin with slash ( / ).  No blank spaces may
+       be  placed  around  the  equals  sign  ( = ) in a setting.
+       ftnchek "?"  will produce a command  summary  listing  all
+       options and settings.
+
+       For  settings  that  take a list of warnings, namely -f77,
+       -pretty, -portability, and -truncation, the list  consists
+       of  keywords  separated by commas or colons.  The list can
+       be omitted, having the effect of turning on all the corre-
+       sponding warnings.  Also, if the list is omitted, the set-
+       ting name can be prefixed with no  to  turn  off  all  the
+       warnings  it  controls.   For  example,  -f77 turns on all
+       warnings about  nonstandard  constructions,  while  -nof77
+       turns them all off.    Three special keywords are:
+
+       help   Print  out  all  the  warning  option keywords con-
+              trolled by the setting, with a brief explanation of
+              their  meanings.  This keyword cannot be given in a
+              list with other keywords.
+
+       all    Set all warnings. This turns on all  warnings  con-
+              trolled by the setting.
+
+       none   Clear  all  warnings.   This turns off all warnings
+              controlled by the setting.
+
+       These special keywords must be given  in  full.   For  all
+       other  warning  keywords, only as many letters of the key-
+       word as are necessary to identify it unambiguously need be
+       given.  Including a keyword in the list turns its warnings
+       on.  For example, -f77=intrinsic would turn  on  only  the
+       warnings  about  use  of  nonstandard intrinsic functions.
+       Prefixing a keyword by no- turns its  warnings  off.   For
+       example,  -pretty=no-long-line  turns  off  warnings about
+       lines exceeding 72 columns in  length  while  leaving  all
+
+
+
+                            4 Apr 1996                          5
+
+
+
+
+
+FTNCHEK 2.9(1L)                                   FTNCHEK 2.9(1L)
+
+
+       other  warnings about misleading appearance in effect.  If
+       a setting has default none, you can turn on  all  warnings
+       except  one  or  two  by  using  all  first.  For example,
+       -f77=all,no-include enables warnings about all nonstandard
+       extensions  except  INCLUDE  statements.  If a setting has
+       default all, you can turn off all warnings except  one  or
+       two   by   using   none   first.   For  example,  -trunca-
+       tion=none,demotion would turn off  all  precision  related
+       warnings except about demotions.
+
+       When ftnchek starts up, it looks for environment variables
+       and also for a preferences file.  Any options  defined  in
+       the  environment  or  in  the preferences file are used as
+       defaults in place of  the  built-in  defaults.   They  are
+       over-ridden  by any command line options.  See the section
+       on changing the defaults for details about the environment
+       options and the preferences file.
+
+
+       When  giving  a  name  of  an input file, the extension is
+       optional.  If no extension is given,  ftnchek  will  first
+       look  for a project file with extension .prj, and will use
+       that if it exists.  If not, then ftnchek will look  for  a
+       Fortran  source  file with the extension .for for VMS sys-
+       tems, .f for UNIX systems.  More than one file name can be
+       given  to  ftnchek, and it will process the modules in all
+       files as if they were in a single file.
+
+
+       Wildcards are allowed in the specification of filenames on
+       the  command line for the VMS and MS-DOS versions, as also
+       of course under UNIX and any other  system  that  performs
+       wildcard expansion in the command processor.
+
+       If  no filename is given, ftnchek will read input from the
+       standard input.
+
+
+INSTALLATION AND SUPPORT
+       The ftnchek program can be obtained by anonymous ftp  from
+       many   software   servers,   including   host   netlib.org
+       (128.169.92.17) where it is located in directory /fortran.
+       You should download it in binary mode.  If the file exten-
+       sion is .Z, uncompress with the Unix  uncompress(1)  util-
+       ity.   If  the  file extension is .gz, uncompress with the
+       GNU gunzip(1L) program.  Then use  tar(1)  to  unpack  the
+       files into a subdirectory.
+
+       Installation requires a C compiler for your computer.  See
+       the  INSTALL  file  provided  with  the  distribution  for
+       instructions  on  installing ftnchek on your system.  Exe-
+       cutable binary for particular systems such as  IBM  PC  or
+       Macintosh,  as available, can be obtained by anonymous ftp
+       from  ftp.dsm.fordham.edu   (150.108.64.2),   located   in
+
+
+
+                            4 Apr 1996                          6
+
+
+
+
+
+FTNCHEK 2.9(1L)                                   FTNCHEK 2.9(1L)
+
+
+       directory  /pub/ftnchek2.9.   Assistance in preparing such
+       executable binary forms is welcome.
+
+       Information about the latest version and the status of the
+       project  can  be obtained by the Internet command ``finger
+       ftnchek@mary.fordham.edu''.  For further  information  and
+       to  report  bugs, you may contact Dr. Robert Moniot at the
+       following network address:
+
+                  moniot@mary.fordham.edu
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            4 Apr 1996                          7
+
+

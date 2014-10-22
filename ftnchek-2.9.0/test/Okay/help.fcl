@@ -1,0 +1,75 @@
+
+FTNCHEK Version 2.9 April 1996 Patch Level 0
+
+Copyright (C) 1994, 1995, 1996 by Robert K. Moniot
+This program is free software.  Permission is granted to
+modify it and/or redistribute it, retaining this notice.
+No guarantees accompany this software.
+
+Commandline options [default]:
+    -[no]check [yes]: perform checking
+    -[no]crossref [no]: print call cross-reference list
+    -[no]declare [no]: list undeclared variables
+    -[no]division [no]: catch possible div by 0
+    -[no]extern [yes]: check if externals defined
+    -[no]help [no]: print help screen
+    -[no]library [no]: treat next files as library
+    -[no]list [no]: print program listing
+    -[no]novice [yes]: extra help for novices
+    -[no]project [no]: create project file
+    -[no]pure [yes]: functions have no side effects
+    -[no]quiet [no]: less verbose output
+    -[no]reference [no]: print who-calls-who reference list
+    -[no]resources [no]: show info on resource usage
+    -[no]sixchar [no]: catch nonunique names
+    -[no]sort [no]: prerequisite-order sort of modules
+    -[no]symtab [no]: print symbol table info
+    -[no]vcg [no]: print call graph in vcg format
+    -[no]version [no]: print version number
+    -[no]volatile [no]: assume volatile common blocks
+    -f77=str [all]: warn about non-F77 extensions
+        Use -f77=help for list of options
+    -include=str [NONE]: include-file directory
+    -output=str [NONE]: output file name
+    -portability=str [none]: warn about portability problems
+        Use -portability=help for list of options
+    -pretty=str [all]: warn about deceiving appearances
+        Use -pretty=help for list of options
+    -truncation=str [all]: check for truncation pitfalls
+        Use -truncation=help for list of options
+Settings (legal range) [default]:
+    -arguments=dd (0 to 3) [3]: check args: 0=none 1=number 2=type 3=all
+    -array=dd (0 to 3) [3]: check array args: 0=none 1=dims 2=size 3=all
+    -calltree=dd (0 to 15) [0]: print subprogram call graph: sum of:
+	  1=print call graph in tree format
+	  2=who-calls-who format
+	  3=VCG format
+	  4=do not prune routines printed earlier
+	  8=keep program order, not alphabetic
+    -columns=dd (72 to 132) [72]: max line length processed
+    -common=dd (0 to 3) [3]: common check: 0=none 3=most strict
+    -intrinsic=dd (0 to 223) [222]: intrinsic function options: three digits:
+	ones digit=choice: 0=f77, 1=extra, 2=unix, 3=vms
+	tens digit=RAND form: 0=no arg, 1=one arg, 2=either
+	hundreds digit=IARGC form: 0=no arg, 1=one arg, 2=either
+    -makedcls=dd (0 to 1023) [0]: make type declaration statements: sum of:
+	  1=declarations
+	  2=undeclared-only
+	  4=compact
+	  8=use-continuation-lines
+	 16=keywords-lowercase
+	 32=variables-and-constants-lowercase
+	 64=exclude-sftran3-internal-variables
+	128=asterisk-comment-character
+	256=lowercase-comment-char
+	512=no-array-dimensions
+    -source=dd (0 to 7) [0]: source format options: sum of:
+	  1=DEC Fortran tab-format
+	  2=VMS-style INCLUDE statement
+	  4=UNIX-style backslash escape char
+    -usage=dd (0 to 333) [333]: check usage: three digits:
+	1st digit=subprogs, 2nd digit=common vars, 3rd digit=local vars
+	digit 0=no check, 1=used-not-defined 2=unused 3=all
+    -wordsize=dd (0 to 16) [4]: standard wordsize in bytes (0=no default)
+    -wrap=dd (0 to 999) [79]: width of page to wrap error messages
+(First 3 chars of option name significant)

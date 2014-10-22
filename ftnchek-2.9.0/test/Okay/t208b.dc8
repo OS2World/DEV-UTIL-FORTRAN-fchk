@@ -1,0 +1,18 @@
+c====>Begin Module %MAIN      File t208b.f        All variables
+c
+c     Intrinsic functions
+c
+      INTRINSIC           COS,         SIN,         SQRT
+c
+c     External functions
+c
+      EXTERNAL            MYSQRT,      MYSUB
+c
+      REAL                MYSQRT
+c
+c     Parameter variables
+c
+      INTEGER             NPI
+      PARAMETER           (NPI = 9)
+c
+c====>End Module   %MAIN      File t208b.f     

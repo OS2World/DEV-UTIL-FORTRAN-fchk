@@ -1,0 +1,123 @@
+
+FTNCHEK Version 2.9 April 1996
+
+File comclash.f:
+
+      1 	common /abc/ x,y,z
+      2 	abc = 5
+      3 	x = abc
+      4 	end
+
+Module %MAIN: prog
+
+Common blocks referenced:
+
+       ABC         
+
+Variables:
+ 
+      Name Type Dims     Name Type Dims     Name Type Dims     Name Type Dims
+       ABC real*            X real*            Y real*            Z real*  
+
+* Variable not declared. Type has been implicitly defined.
+
+
+
+      5 	subroutine sub1
+      6 	common /abc/ x,y,z
+      7 	real abc(5)
+      8 	x = abc(1)
+      9 	call sub2(x,y)
+     10 	call sub2(1.0,2)
+     11 	end
+
+Module SUB1: subr
+
+External subprograms referenced:
+
+      SUB2: subr   
+
+Common blocks referenced:
+
+       ABC         
+
+Variables:
+ 
+      Name Type Dims     Name Type Dims     Name Type Dims     Name Type Dims
+       ABC real  1          X real*            Y real*            Z real*  
+
+* Variable not declared. Type has been implicitly defined.
+
+
+Warning: Variables used before set:
+       ABC         
+
+
+     12 	subroutine sub2(a,b)
+     13 	common /abc/ x,i,z
+     14 	x = abc(1)
+     15 	end
+
+Module SUB2: subr
+
+External subprograms referenced:
+
+       ABC: real*  
+
+Common blocks referenced:
+
+       ABC         
+
+Variables:
+ 
+      Name Type Dims     Name Type Dims     Name Type Dims     Name Type Dims
+         A real*            B real*            I intg*            X real*  
+         Z real*  
+
+* Variable not declared. Type has been implicitly defined.
+
+
+Warning: Variables declared but never referenced:
+         A*                 B*        
+  * Dummy argument
+
+
+     16 	function abc(n)
+     17 	abc = n*n
+     18 	end
+
+Module ABC: func: real*
+
+Variables:
+ 
+      Name Type Dims     Name Type Dims     Name Type Dims     Name Type Dims
+       ABC real*            N intg*  
+
+* Variable not declared. Type has been implicitly defined.
+
+
+
+Nonportable usage: File contains tabs
+
+ 0 syntax errors detected in file comclash.f
+ 7 warnings issued in file comclash.f
+
+Common block ABC:
+  Elements never used, never set: Z
+Warning: Common block and subprogram have same name (nonstandard)
+    Common block ABC declared in module SUB2 line 13 file comclash.f
+    Subprogram ABC declared in module ABC line 16 file comclash.f
+Common block ABC: data type mismatch
+  at position 2:
+    Variable Y has type real in module %MAIN line 1 file comclash.f
+    Variable I has type intg in module SUB2 line 13 file comclash.f
+Subprogram SUB1 never invoked
+    defined in module SUB1 line 5 file comclash.f
+Subprogram SUB2 never invoked
+    defined in module SUB2 line 12 file comclash.f
+Subprogram SUB2:  argument data type mismatch
+  at position 2:
+    Dummy arg B is type real  in module SUB2 line 12 file comclash.f
+    Actual arg 2 is type intg  in module SUB1 line 10 file comclash.f
+Subprogram ABC never invoked
+    defined in module ABC line 16 file comclash.f

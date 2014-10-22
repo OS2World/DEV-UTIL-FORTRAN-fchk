@@ -1,0 +1,9 @@
+
+FTNCHEK Version 2.9 April 1996
+
+File args11.f:
+ 0 syntax errors detected in file args11.f
+Subprogram SUBA:  argument arrayness mismatch
+  at position 1:
+    Dummy arg C is whole array in module SUBA line 4 file args11.f
+    Actual arg C(1) is array element in module %MAIN line 2 file args11.f

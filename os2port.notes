@@ -1,0 +1,71 @@
+* Sources, as fetched from ftp://ftp.dsm.fordham.edu/pub/ on 29-Mar-96
+* applied the patch to bring it up to version 2.8.4 to the sources.
+* Changed makefile.
+* Added two new symbolic targets, OS2emx and OS2noemx.
+  OS2emx generates an executable which relies on the emx.dll runtime
+  library to be somewhere in the LIBPATH; OS2noemx generates a
+  standalone executable using the IBM linker link386.exe. It is a bit
+  bigger. I couldn't play with other C compilers as I don't have any.
+  So, both use gcc / emx.
+
+* Added things like symbols for obvious extensions:
+  OBJ
+  EXE
+
+  which either need to be out in by hand in the header of the makefile
+  or all the other Symbolic targets for real UNIX should get additional
+  options like
+
+  'OBJ = .o'\
+  'EXE = '\
+
+  to restore the defaults typical for UNIX.  This is up to you, since
+  either will change the distribution.
+
+* added a new implicit rule for compilation to allow any object file
+  name and not just the UNIX standard *.o. With these changes, the makefile
+  should be easily adapted to VMS and the like.
+
+
+
+* This 'exe' magic can by the way be avoided
+  for the OS2emx target by adding the following lines to the target (they
+  are commented out right now):
+
+#     echo $(FTNCHEK) created.  Building now $(FTNCHEK).exe:
+#     emxbind -bs -w $(FTNCHEK)
+#     rm $(FTNCHEK)
+#     echo $(FTNCHEK).exe created.
+
+This then takes the a.out style output file of gcc and makes it into
+an *.exe file. However, I don't know how to do the same for link386,
+and it seems cleaner this way, anyway, since it also allows VMS and
+other targets to be added, or to use other compilers than gcc under
+OS/2, like Borland C++/2 or IBM C-Set++ and so on.
+
+On OS/2, the environment variable SHELL may need to be commented out,
+depending on the combination of shells (I run tcsh and sh / ksh ports)
+and make utilities. On my system gcc is otherwise not found ...
+
+To build this, at least mv.exe should be there, and of course, 
+gcc / emx should be installed.
+
+The ftnchek.def file has been modified again, the line
+; STACKSIZE      0x8000
+is commented out and the stack size given on the gcc command line
+with -Zstack 64. Otherwise I get a stack overflow.
+This may be only neccessary for large environments (my config.sys
+is about 18 kB large, and my .tcshrc isn't small either), but anyway.
+
+The execuatables are compiled with gcc 2.7.2 / emx09b  + emxfix03
+applied, and require emx.dll (version 09b or later) in the LIBPATH.
+The other execuatable is standalone.
+
+All tested under OS/2 (v. 3.0 or 2.3) Warp only. Runs fine.
+
+
+Stefan A. Deutscher, sad@utk.edu
+
+PS: Maybe updating the man page (to display version 2.8.4) and the
+    version information of ftnchek, as it starts (2.8.4 instead of
+    2.8) would be nice.

@@ -1,0 +1,13 @@
+C====>Begin Module FOO        File t208l.f        All variables
+C
+C     Argument variables
+C
+      INTEGER             M,           N
+C
+      REAL                A
+C
+C     Local variables
+C
+      REAL                B
+C
+C====>End Module   FOO        File t208l.f     

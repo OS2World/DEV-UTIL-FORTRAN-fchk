@@ -1,0 +1,14 @@
+C====>Begin Module %MAIN      File namelist.f     Undeclared variables
+C
+C     Local variables
+C
+      INTEGER             L,           L6,          M
+C
+      REAL                A,           C,           X,           X1
+      REAL                Y,           Y2Z3,        Z
+C
+C     Common variables
+C
+      REAL                B,           E,           F
+C
+C====>End Module   %MAIN      File namelist.f  

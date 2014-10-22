@@ -1,0 +1,467 @@
+		 README file for Ftnchek Version 2.9.0
+
+Author: Robert Moniot
+	Fordham University
+	New York, NY  10023  USA
+	Telephone: (212) 636-6311
+	Internet:  moniot@mary.fordham.edu
+
+Date:	March 4, 1996
+
+Ftnchek is written in a portable style of C.  You must have a C
+compiler for the machine on which you wish to build it.
+Information about the latest version and the status of the project can be
+obtained by the Internet command ``finger ftnchek@mary.fordham.edu''.
+
+If the file you received is a UNIX compressed tar file, suffix .Z, you
+should first unzip it using the UNIX ``uncompress'' command, and then
+give it as input to ``tar'' to unpack the files.  For example, assuming
+the file has been placed in the desired directory, and is named
+ftnchek.tar.Z, you would give the two UNIX commands
+	uncompress ftnchek.tar.Z
+	tar -xf ftnchek.tar
+If the suffix is .gz instead of .Z, use the program ``gunzip'' in
+place of ``uncompress''.  The gunzip program is publicly available
+from the GNU project.
+
+The tar command creates a directory named ftnchek-2.9.1 containing the
+files of the distribution.  These files are described briefly below.
+You should change directory to this directory and follow the
+installation instructions.
+
+
+		  INSTALLING FTNCHEK
+		  ------------------
+
+See the file INSTALL for detailed instructions on how to install
+ftnchek on your system.  Once Ftnchek is working, you can test it by
+giving the command:
+
+        $ ftnchek -list -sym average
+
+Then compare the output against the file ``average.out''.  A more
+thorough checkout is possible on Unix systems by giving the ``make
+check'' command described above.
+
+
+		   NEW FEATURES
+		   ------------
+
+Here are the new features in version 2.9, aside from bug fixes:
+
+	o New warnings: statement function defined but not used; and
+	  common block and subprogram that have the same name.
+
+	o The -f77, -portability, -pretty, and -truncation options now
+	  take lists of keywords to provide finer control over
+	  warnings.  The -hollerith flag is eliminated: use
+	  -port=hollerith instead.
+
+	o The -backslash and -tab flags are replaced with -source=num
+	  setting, which also includes control of VMS syntax for
+	  INCLUDE statement (defaulting extension, /LIST qualifier).
+
+	o New setting -intrinsic=num to control treatment of
+	  nonstandard intrinsic functions.  Ones digit selects which
+	  set of intrinsic functions to recognize.  Tens digit
+	  controls RAND syntax and hundreds digit IARGC syntax.  These
+	  were formerly compilation options when building ftnchek.
+
+	o The -usage flag is now a 3-digit number, for separate
+	  control of checking of subprograms, common variables, and
+	  local variables.  See the manual for details.
+
+	o The -calltree option now takes various numeric settings to
+	  specify options for the form of the output.
+
+	o The -noverbose flag is changed to -quiet.
+
+	o New flag -version to print ftnchek's name and version.
+
+	o New flag, -nocheck, useful to suppress warnings when using
+	  ftnchek for purposes other than checking.
+
+	o New -makedcls value: 512=no-array-dimensions.  This bit is
+	  for users who have code lacking type declarations so they
+	  can insert the dcl files without change into the code.
+
+	o Command-line numeric settings can omit the number, giving
+	  them default turn-on values.
+
+	o Ftnchek now reads a startup file named .ftnchekrc or
+	  ftnchek.ini located in the current directory or in the home
+	  directory.
+
+	o Made the non-parenthesis PARAMETER statement variant part of
+	  the distribution, i.e. no longer as a patch accompanying the
+	  source.
+
+	o Made the "Cray" POINTER statement part of the distribution,
+	  i.e. no longer as a patch accompanying the source.
+
+	o The support for VCG has been improved so that ftnchek now
+	  sends VCG output to a file that is suitable for direct input
+	  to xvcg.  The script fcl2vcg is now obsolete.  Support for
+	  VCG is now automatic.
+
+	o Some improvements to help in maintaining and distributing
+	  ftnchek: the source code has been augmented with function
+	  prototypes, and a configure script is used to handle
+	  variations among systems automatically.  Hopefully some of
+	  the glitches in installation will be smoothed over by this.
+	  (Please report any glitches that remain so the configure
+	  script can be fixed.)
+
+			     SOURCE FILES
+			     ------------
+
+The minimum set of source files needed to compile ftnchek are:
+
+Header files:
+	ftnchek.h intrins.h iokeywds.h keywords.h
+	symtab.h tokdefs.h
+
+C source:
+	exprtype.c forlex.c fortran.c ftnchek.c
+	pgsymtab.c plsymtab.c project.c symtab.c
+
+For VAX, there is also required:
+	shell_mung.c
+
+An associated file, not needed to compile ftnchek, is the Yacc grammar:
+	fortran.y
+The file fortran.c is generated from fortran.y by yacc or bison.  The
+file tokdefs.h is a copy of the y.tab.h file also generated from fortran.y.
+
+There is a module definition file for IBM PC-OS/2:
+	ftnchek.def 
+
+
+		   AUXILIARY FILES
+		   ---------------
+
+This section describes the auxiliary and documentation files included
+with the distribution.
+
+The example program used in the documentation, the result of running
+Ftnchek on it, and the example program, corrected:
+	average.f average.out correct.f
+
+NOTE: VAX/VMS users should rename "AVERAGE.F" to "AVERAGE.FOR".
+
+DCL command files for building ftnchek on DEC VAX and Alpha under VMS:
+	build.com build-alpha.com cc.com link.com link-alpha.com
+
+An awk script which converts declarations files into include files,
+and a file used to create a shell script (to be installed as dcl2inc):
+	dcl2inc.awk dcl2inc.sh.in
+
+Files used to create Makefile:
+	configure configure.in Makefile.in
+
+Specialized makefiles for Borland C (IBM PC), Macintosh
+Programmer's Workbench, OS/2 and UNIX or UNIX-like systems:
+	makefile.bc makefile.mpw makefile.os2 makefile.generic makefile.unix
+
+The file makefile.generic is created from Makefile.in with vanilla
+configuration options.  The file makefile.unix is the former
+distribution makefile, with lots of specific targets.  It is no longer
+being maintained, but should still work.  Use configure to build a
+local Makefile instead.  If you cannot use configure for some reason,
+makefile.generic should be OK for most cases, and can be fixed up to
+suit your needs.
+
+Documentation files:
+	ftnchek.doc	ftnchek user's manual in flat text format.
+	ftnchek.ps	PostScript version of the same.
+	ftnchek.hlp	Source for a HELP library for VMS systems.
+	ftnchek.man	The file from which these files are derived.
+	dcl2inc.doc	dcl2inc user's manual in flat text format.
+	dcl2inc.ps	same in PostScript.
+	man2ps		script for converting man pages to PostScript
+
+The Unix manual page, ftnchek.1, is generated from ftnchek.man during the
+installation process.  The VMS help library, ftnchek.hlb, is generated
+from ftnchek.hlp by the build.com script.
+
+A list of changes made since the original release of this version:
+	PATCHES
+
+The UNIX Makefile employs a private script, man2ps, for converting
+manual pages to PostScript (linked to names me2ps, mm2ps, and ms2ps,
+it will support the -me, -mm, and -ms formats as well).  The script
+currently knows about GNU groff, Sun Solaris 2.x troff + dpost and
+psroff; it will use any of these, with groff preferred.  For troff +
+dpost, if you get errors like this
+
+troff: Can't open /usr/lib/font/devpost/C.out; line 818, file <standard input>
+
+you can repair them if you have appropriate privileges:
+
+% cd /usr/lib/font/devpost
+% ln CO C
+% ln CO.name C.name
+% ln CO.out C.out
+
+These commands simply create links between a Courier font that Sun
+named CO, and the one named C that is expected by ftnchek.man.  If
+some troff expert knows a better way to handle this, please tell us.
+Additional alternatives in the man2ps script to support ditroff and
+other vendors' troff-to-PostScript solutions will also be welcome.
+
+
+
+		     CUSTOMIZING
+		     -----------
+
+This section gives details about using macro names to control the
+system-dependent choices available in compiling Ftnchek.
+
+NOTE: if you choose to alter the definitions of any of these macros
+from their default values, then "make check" will probably give some
+differences.  You should first build ftnchek using the default
+definitions, run "make check" to catch any problems, then rebuild
+ftnchek with your preferred definitions before doing "make install".
+
+Ftnchek has a number of fixed internal parameters that affect its
+operation, such as the symbol table sizes and support for various
+extensions and particular operating systems.  The following is a
+description of the most important of these parameters.  They are
+implemented as C language macro names.  If you wish to change a
+parameter defined by one of these macros, it is necessary to recompile
+Ftnchek with the macro definition changed to the desired value.
+
+Briefly, the effect of the macro names specifying the system is as
+follows: If VMS or __TURBOC__ or MSDOS is defined, then both "/" and
+"-" are allowed as option prefixes.  Otherwise only "-" is allowed.
+If VMS or __TURBOC__ or MSDOS is defined, then ".FOR" will be the
+default extension for source files, otherwise ".f" is used.  If VMS is
+defined, then support for VMS extensions is enabled by default: this
+changes the default values of options -source to 2 (VMS include
+syntax) and -intrinsics to 223 (VMS intrinsics set).  If UNIX is
+defined, then only "-" is allowed as an option prefix, the default for
+-source is 0 and -intrinsics is 222 (UNIX intrinsic set).  More
+detailed control over these options is possible by defining other
+macro names described below.
+
+This can usually be done without editing any of the source files, by
+specifying the macro definition on the C compiler command line.  Under
+UNIX, this is done with the -D option.  For example, to define the
+macro BpW that sets the default word size to be eight bytes, the
+compiler would be invoked with the additional option -DBpW=8.  Under
+VMS, the corresponding option would be /DEFINE=("BpW=8").  For other
+systems, consult your C compiler manual.  When using make, specify
+these definitions by setting the macro OPTIONS, e.g.
+	make "OPTIONS= -DBpW=8"
+If you want to put such definitions into the Makefile, do not edit
+Makefile.  Edit Makefile.in and re-run the configure script.
+
+Unless otherwise noted, the following macro names need not have any
+particular value.  They only need to be defined in order to have
+effect.  For more details on these parameters, look at ftnchek.h.
+These fall into three broad groups: system-dependent aspects, features
+and options, and table sizes.
+
+  --- System-dependent defines
+
+  Macro                 Meaning                           Remarks
+UNIX                  Compile Ftnchek for UNIX-like    Default for most
+                       operating system                 choices
+VMS                   Compile Ftnchek for VAX/VMS      Automatically defined
+                       operating system                 by VAX C compiler
+MSDOS                 Compile Ftnchek for MS-DOS       Automatic if compiler
+                       operating system                 is Turbo C
+NO_PROTOTYPES         Compiler does not accept         Defined by configure
+                       ANSI C prototypes
+NO_FLOATING_POINT     Suppress floating point          Unimportant--define if
+                       computations internally           no hardware f.p.
+DEC_TABS              Default value of -source bit 1   Default = 0 (NO)
+VMS_INCLUDE           Default value of -source bit 2   Default=0 for Unix,
+                                                         1 for VMS
+UNIX_BACKSLASH        Default value of -source bit 4   Default = 0 (NO)
+OPTION_PREFIX_SLASH   Allow options to start with      Implied by VMS and by
+                       either - or /.                   MSDOS
+NO_OPTION_PREFIX_SLASH Prohibit options with /         To override VMS or
+							 MSDOS default
+SPECIAL_HOMEDIR       Home directory for non-unix     VMS default:"SYS$DISK:[]"
+UNIX_RC_FILE	      Name of startup file.            Default: ".ftnchekrc"
+NONUNIX_RC_FILE       Alternate startup filename.      Default: "ftnchek.ini"
+DEF_SRC_EXTENSION     Default extension expected       Defaults: VMS, MSDOS:
+                       for input source files	        ".for" All others: ".f"
+DEF_LIST_EXTENSION    Default extension for output     Default: ".lis"
+                       list-files
+DEF_PROJ_EXTENSION    Default extension for input      Default: ".prj"
+                       and output project files
+DEF_DCL_EXTENSION     Default extension for            Default: ".dcl"
+                       declaration files
+DEF_INC_EXTENSION     Default extension for            Default:
+                       include files                     DEF_SRC_EXTENSION
+DEF_VCG_EXTENSION     Default extension for VCG        Default: ".vcg"
+                       output files
+STDIN_PROJ_FILENAME   Output project-file name used    Default: "ftnchek.prj"
+                       when input source is stdin
+ENV_PREFIX            Prefix for environment           Default "FTNCHEK_"
+                       variables that set options
+
+
+   --- macros that control ftnchek behavior (syntax, options, etc.)
+VCG_SUPPORT           Add the -vcg switch to allow     Default: -vcg supported
+                       call graph to be visualized.
+NO_VCG_SUPPORT        Suppress -vcg support
+VCG_GRAPH_OPTIONS     Global vcg graph options.       "color: lightgray\n"
+STRICT_SYNTAX         Set default -f77=all             Default is -f77=none
+STRICT_PORTABILITY    Set default -port=all            Default is -port=none
+UGLY_IS_OK            Set default -pretty=none         Default is -pretty=all
+LAX_TRUNCATION        Set default -trunc=none          Default is -trunc=all
+
+The following macros control whether ftnchek accepts certain syntax
+extensions.  They are all defined and cannot be undefined without
+editing ftnchek.h.  If the macros are undefined, then support for the
+extension is completely removed.  This means that the corresponding
+extension will generate syntax or parse errors, not non-standard
+warnings.  Some users might want to do this to make ftnchek smaller
+and more efficient, or out of a sense of fanaticism.
+
+ALLOW_CRAY_POINTERS	Cray pointer syntax
+ALLOW_DOLLARSIGNS	$ in variable names
+ALLOW_DO_ENDDO		DO ... ENDDO and related
+ALLOW_INCLUDE		INCLUDE statement
+ALLOW_QUOTEMARKS	Strings delimited by "
+ALLOW_TYPELESS_CONSTANTS  Binary, octal, hex
+ALLOW_UNDERSCORES	_ in variable names
+ALLOW_UNIX_BACKSLASH	Unix escape sequences in strings
+ALLOW_UNIX_CPP		Unix C preprocessor directives
+ALLOW_VMS_IO		VMS I/O keywords
+
+The following macros determine the default value of the -intrinsic
+setting.  The nonstandard double complex intrinsic functions are
+always recognized since they are needed by the double complex
+datatype.  Other groups of nonstandard functions can be selected to be
+recognized by default using these macros.
+
+STANDARD_INTRINSICS   Do not recognize extended set
+                       of intrinsic functions (Set 0)
+NONSTD_INTRINSICS     Support commonly available       Default behavior
+                       intrinsic functions (Set 1)
+UNIX_INTRINSICS       Support UNIX-specific            Default if UNIX defined
+                       intrinsic functions (Set 2)
+NO_UNIX_INTRINSICS    Do not support UNIX-specific
+                       intrinsic functions
+VMS_INTRINSICS        Support VMS-specific             Default if VMS defined
+                       intrinsic functions (Set 3)
+NO_VMS_INTRINSICS     Do not support VMS-specific
+                       intrinsic functions
+DEF_INTRINSIC_SET     Specify intrinsic set            Override above defaults
+
+RAND_NO_ARG           RAND/IRAND function has no       Default behavior:
+                       argument                         allows both 0 argument
+RAND_ONE_ARG          RAND/IRAND function has one       and 1 argument forms
+                       argument
+IARGC_NO_ARG          IARGC has no argument            Default behavior:
+IARGC_ONE_ARG         IARGC has 1 argument              both forms allowed
+
+NO_BLANKS_IN_NUMBERS  Numeric constants cannot have    Default: blanks allowed
+                       embedded blanks.
+BLANKS_IN_NUMBERS     Numeric constants may have
+                       embedded blanks.
+BpW                   Default bytes per word           Default=4
+                        (for -wordsize setting) 
+
+
+  --- Macros that set table sizes, limits, etc.
+
+MAXLINE               Maximum input line length.       Default 132
+                        Ignores past this.
+MAXIDSIZE             Longest identifier allowed       Default 31
+MAX_SRC_TEXT          Longest text string of a token   Default 20*66
+MAX_CHAR_CODE         Largest char value               Default 255
+MAX_INCLUDE_DEPTH     Max nesting depth of include     Default 16
+                       files
+MAXEXPRTEXT           Length of expr text saved in     Default 15
+                       arg lists
+MAX_RC_LINE           Max input line in rc file        Default 500
+RC_COMMENT_CHAR       Start of comment in rc file      Default '#'
+ENV_INCLUDE_VAR       Name of environment variable     Default "INCLUDE"
+                       specifying include directory
+
+DEFAULT_INCLUDE_DIR   Name of default include          Defaults:
+                       directory                        UNIX: "/usr/include"
+                                                        VMS: "SYS$LIBRARY:"
+                                                        MSDOS: "\\include"
+
+
+The following macros specify various internal table sizes.  If neither
+SMALL_MACHINE nor LARGE_MACHINE is defined, intermediate table sizes
+will be used.  In any case, individual table sizes can be chosen by
+defining the corresponding macro name.  The defaults for the three
+size choices (small, default, large) are listed in the Remarks column.
+
+SMALL_MACHINE         Table sizes appropriate for a
+                       PC without much memory
+LARGE_MACHINE         Table sizes appropriate for a
+                       mainframe or workstation
+
+                                                      small  default large
+HASHSZ                Identifier hash table (elements)  798   2002  20930
+LOCSYMTABSZ           Local symbol table (entries)      300    800   8000
+GLOBSYMTABSZ          Global symbol table (entries)     400   1200  12000
+   The following sizes are *chunk sizes*, specifying the initial table
+   size and the size of new blocks to allocate when initial amounts
+   are used up.  Optimum sizes are dependent on properties of alloc
+   function, and do not set limits on total amounts of space.
+STRSPACESZ            Identifier string space (bytes)  4000  10000  10000
+PARAMINFOSPACESZ      Parameter info field space	 20     50    200
+			(ParamInfo's)
+TOKHEADSPACESZ        Token list header element space    50    200    500
+                       (TokenListHeader's)
+TOKENSPACESZ          Token list space (tokens). Used   200   1000  10000
+                       to store subroutine arguments
+                       and other temporary lists.
+ARGLISTHEADSZ         Argument list header element      300   1500  15000
+                       space (ArgListHeader's)
+ARGLISTELTSZ          Argument list element space      1000   5000  50000
+                       (ArgListElement's)
+COMLISTHEADSZ         Common block list header space    200   1000 10000
+                       (ComListHeader's)
+COMLISTELTSZ          Common block list element space  1000   4000 50000
+                       (ComListElement's)
+PTRSPACESZ            Pointers to array dim text and    200    400  2000
+                       parameter text (char *'s)
+WRAP_COLUMN           Default value for -wrap          Default=79
+                      setting.
+
+
+For the truly adventurous:
+
+Ftnchek has two different memory-management schemes to choose from.
+In the default case, space for the hashtable and the local and global
+symbol tables is allocated at compile time.  These tables cannot
+change size afterwards.  Initial space for strings, tokens (in lists
+and trees), token list headers, token source text, pointers to array
+dim and parameter text is allocated at compile time.  These areas can
+grow as needed by allocating additional chunks that are chained
+together in a linked-list arrangement.  Space for argument list
+headers and elements, and common list headers and elements starts at
+zero and new chunks are allocated as needed.  (None of the newly
+allocated chunks are freed, since it is considered likely that the
+space will be
+needed again.)
+This scheme is well
+suited to machines with large address spaces and virtual memory.  The
+sizes of the fixed tables and chunk sizes for the others can be chosen
+in three standard sets: default, SMALL_MACHINE, and LARGE_MACHINE.
+The latter is preferred for any virtual-memory machine since memory
+does not become "really" allocated until needed.
+
+The second memory-management scheme is selected by the compile-time
+option DYNAMIC_TABLES.  In this case, the fixed-size arrays for the
+hashtable and the local and global symbol tables are replaced by
+pointers, and the space they point to is allocated at the start of
+program execution.  Everything else is the same.  This version runs
+somewhat slower than the first scheme on machines I have tested.  I
+have not proceeded to take advantage of the possibility of letting the
+table sizes be selected at run time by means of command-line settings.
+To do so would require moving the allocation step performed by
+init_tables() to just before the start of processing, analogously to
+init_typesizes().  It would also need a set of command-line options to
+be installed for specifying the different table sizes.

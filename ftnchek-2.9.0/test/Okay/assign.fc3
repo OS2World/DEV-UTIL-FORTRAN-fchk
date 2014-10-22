@@ -1,0 +1,110 @@
+
+FTNCHEK Version 2.9 April 1996
+
+File assign.f:
+     10       c5 = 5Hhello
+                   ^
+Warning near line 10 col 12 file assign.f: hollerith constant may not be
+ portable
+                 ^
+Error near line 10 col 10 file assign.f: type mismatch: holl*5 const assigned
+ to char*5 C5
+     11       c5 = 11Hhello there
+                   ^
+Warning near line 11 col 12 file assign.f: hollerith constant may not be
+ portable
+                 ^
+Error near line 11 col 10 file assign.f: type mismatch: holl*11 const assigned
+ to char*5 C5
+Warning in module SIZEPROP file assign.f:
+   Variables declared but never referenced:
+       C10                  I*                 X*        
+  * Dummy argument
+
+   Variables may be used before set:
+        C5         
+
+     31       i = m
+                ^
+Nonportable usage near line 31 col 9 file assign.f: mixed default and explicit 
+precision items: intg*4 M assigned to intg I
+     34       i = i2
+                ^
+Nonportable usage near line 34 col 9 file assign.f: mixed default and explicit 
+precision items: intg*2 I2 assigned to intg I
+     35       i = i4
+                ^
+Nonportable usage near line 35 col 9 file assign.f: mixed default and explicit 
+precision items: intg*4 I4 assigned to intg I
+     36       i4 = i
+                 ^
+Nonportable usage near line 36 col 10 file assign.f: mixed default and
+ explicit precision items: intg I assigned to intg*4 I4
+     39       i = 4habcd
+                  ^
+Warning near line 39 col 11 file assign.f: hollerith constant may not be
+ portable
+                ^
+Nonportable usage near line 39 col 9 file assign.f: mixed default and explicit 
+size items: holl*4 const assigned to intg I
+     40       i = 8habcdefgh
+                  ^
+Warning near line 40 col 11 file assign.f: hollerith constant may not be
+ portable
+                ^
+Nonportable usage near line 40 col 9 file assign.f: mixed default and explicit 
+size items: holl*8 const assigned to intg I
+     41       x = r4
+                ^
+Nonportable usage near line 41 col 9 file assign.f: mixed default and explicit 
+precision items: real*4 R4 assigned to real X
+     42       x = r8
+                ^
+Nonportable usage near line 42 col 9 file assign.f: mixed default and explicit 
+precision items: real*8 R8 assigned to real X
+     48       r16 = d
+                  ^
+Nonportable usage near line 48 col 11 file assign.f: mixed default and
+ explicit precision items: dble D assigned to real*16 R16
+     50       d = r4
+                ^
+Nonportable usage near line 50 col 9 file assign.f: mixed default and explicit 
+precision items: real*4 R4 assigned to dble D
+     51       d = r8
+                ^
+Nonportable usage near line 51 col 9 file assign.f: mixed default and explicit 
+precision items: real*8 R8 assigned to dble D
+     52       d = r16
+                ^
+Nonportable usage near line 52 col 9 file assign.f: mixed default and explicit 
+precision items: real*16 R16 assigned to dble D
+     55       i = L4
+                ^
+Error near line 55 col 9 file assign.f: type mismatch: logl*4 L4 assigned to 
+intg I
+Warning in module %MAIN file assign.f:
+   Variables declared but never referenced:
+       C16                C32                  J                  L         
+        L2                  Y         
+
+   Variables used before set:
+        L4                 R4                 R8         
+
+   Variables may be used before set:
+         C                 I2                 I4         
+
+
+ 3 syntax errors detected in file assign.f
+ 21 warnings issued in file assign.f
+
+Subprogram SIZEPROP:  argument data type mismatch
+  at position 2:
+    Dummy arg I is type intg  in module SIZEPROP line 2 file assign.f
+    Actual arg I2 is type intg*2  in module %MAIN line 56 file assign.f
+  at position 3:
+    Dummy arg X is type real  in module SIZEPROP line 2 file assign.f
+    Actual arg R16 is type real*16  in module %MAIN line 56 file assign.f
+Subprogram SIZEPROP:  argument usage mismatch
+  at position 1:
+    Dummy arg CADJ is modified in module SIZEPROP line 2 file assign.f
+    Actual arg 'hello' is const or expr in module %MAIN line 56 file assign.f

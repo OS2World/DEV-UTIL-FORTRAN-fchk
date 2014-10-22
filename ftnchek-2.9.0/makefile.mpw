@@ -1,0 +1,90 @@
+### begin ###
+
+# Macintosh Programmer's Workshop (MPW) version of Makefile
+# for Fortran program checker.  Execution requires MPW C.
+
+# For shipping purposes, Mac special characters have been changed, and
+# must be restored as follows:
+#	Replace + with option-d
+#	Replace / with option-f
+
+
+#    Copyright (C) 1991 by Robert K. Moniot.
+#    This program is free software.  Permission is granted to
+#    modify it and/or redistribute it, retaining this notice.
+#    No guarantees accompany this software.
+
+
+# Object files to build
+
+Objects = +
+  ftnchek.c.o forlex.c.o fortran.c.o pgsymtab.c.o plsymtab.c.o +
+  symtab.c.o exprtype.c.o project.c.o
+
+
+# Dependencies for object files
+
+ftnchek.c.o  / makefile ftnchek.c +
+               ftnchek.h
+
+forlex.c.o   / makefile forlex.c +
+               ftnchek.h keywords.h symtab.h tokdefs.h
+
+fortran.c.o  / makefile fortran.c +
+               ftnchek.h symtab.h fortran.c
+
+pgsymtab.c.o / makefile pgsymtab.c +
+               ftnchek.h symtab.h
+
+plsymtab.c.o / makefile plsymtab.c +
+               ftnchek.h symtab.h
+
+symtab.c.o   / makefile symtab.c +
+               ftnchek.h iokeywds.h intrins.h symtab.h tokdefs.h
+
+exprtype.c.o  / makefile exprtype.c +
+               ftnchek.h symtab.h tokdefs.h
+
+project.c.o  / makefile project.c +
+               ftnchek.h symtab.h
+
+
+# Compiler options.  Users who don't have at least a 68020 CPU probably won't
+# be using this program (MPW is pretty slow on a 68000).  But if you need to,
+# remove the -mc68020 option from the COptions definition below.
+
+COptions = -mc68020 -m -s {default}
+
+# This makefile relies on the default C compiler rules built into MPW's
+# "Make" tool, so there are no compile commands in the makefile itself.
+
+# Link command
+
+ftnchek / makefile {Objects}
+  Link -w -ac 4 -ad 4 -c 'MPS ' -t 'MPST' +
+  {Objects} +
+  "{Libraries}"Runtime.o +
+  "{Libraries}"Interface.o +
+  "{CLibraries}"CSANELib.o +
+  "{CLibraries}"StdClib.o +
+  -o ftnchek
+
+# Other makefile functions
+
+clean /
+  delete -i {Objects}
+
+clobber / clean
+  delete -i ftnchek
+
+uninstall /
+  delete -i "{MPW}"Tools:ftnchek
+
+install / ftnchek
+  move -y ftnchek "{MPW}"Tools:
+
+#  Kindly provided by:
+#       Lee D. Rimar / Absoft Corporation
+#	ldr@absoft.com,  voice: 313-853-0095
+
+### end ###

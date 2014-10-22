@@ -1,0 +1,38 @@
+
+FTNCHEK Version 2.9 April 1996
+
+File chestnuts.f:
+      6       DOUBLE PRECISION I=1,10
+                ^
+Warning near line 6 col 9 file chestnuts.f: DO index is not integer
+              ^
+Warning near line 6 col 7 file chestnuts.f: Nonstandard syntax
+      8       END DO
+              ^
+Warning near line 8 col 7 file chestnuts.f: Nonstandard syntax
+Warning in module %MAIN file chestnuts.f:
+   Variables set but never used:
+     DO10I         DOUBLEPRECISIONI             FORMAT         
+
+   Variables used before set:
+        H3                I10                 I9         
+
+   Names longer than 6 chars (nonstandard):
+DOUBLEPRECISIONI         UBLEPRECISIONI         
+
+Warning in module F file chestnuts.f:
+   Statement functions declared but never referenced:
+REALFUNCTIONF         
+
+   Variables set but never used:
+ FUNCTIONF         
+
+   Names longer than 6 chars (nonstandard):
+ FUNCTIONF         REALFUNCTIONF         
+
+
+ 0 syntax errors detected in file chestnuts.f
+ 9 warnings issued in file chestnuts.f
+
+Subprogram F never invoked
+    defined in module F line 12 file chestnuts.f

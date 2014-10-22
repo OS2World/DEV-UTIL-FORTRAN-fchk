@@ -1,0 +1,42 @@
+
+FTNCHEK Version 2.9 April 1996
+
+File comusage.f:
+ 0 syntax errors detected in file comusage.f
+Common block INP is volatile
+Warning: Common block INP may become undefined between activations
+     in module INPUT line 10 file comusage.f
+     in module COMP line 20 file comusage.f
+        during activation of module MAIN
+Common block LAST is volatile
+Warning: Common block LAST may become undefined between activations
+     in module OUTPUT line 32 file comusage.f
+     in module INPUT line 12 file comusage.f
+        during activation of module MAIN
+Common block ZAP is volatile
+Common block OUTP is volatile
+Warning: Common block OUTP may become undefined between activations
+     in module OUTPUT line 30 file comusage.f
+     in module COMP line 23 file comusage.f
+        during activation of module MAIN
+Common block %BLANK:
+  Elements used but never set: all
+Common block INP:
+  Elements never used, never set: X4
+Common block LAST:
+  Elements used but never set: N3
+  Elements set but never used: N1 N2
+Common block ZAP: unused
+Common block INP: varying length:
+    Has 4 variables in module INPUT line 10 file comusage.f
+    Has 3 variables in module COMP line 20 file comusage.f
+Common block LAST: data type mismatch
+  at position 1:
+    Variable Y1 has type real in module INPUT line 12 file comusage.f
+    Variable N1 has type intg in module OUTPUT line 32 file comusage.f
+  at position 2:
+    Variable Y2 has type real in module INPUT line 12 file comusage.f
+    Variable N2 has type intg in module OUTPUT line 32 file comusage.f
+  at position 3:
+    Variable Y3 has type real in module INPUT line 12 file comusage.f
+    Variable N3 has type intg in module OUTPUT line 32 file comusage.f

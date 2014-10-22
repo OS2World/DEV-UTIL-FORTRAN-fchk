@@ -1,0 +1,445 @@
+#=======================================================================
+# UNIX version of Makefile for Fortran program checker ftnchek version 2.9
+#
+# Current target list:
+#	TAGS
+#	all			build ftnchek and its documentation files
+#	blurb.txt
+#	check			run validation test suite
+#	clean			remove unnecessary intermediate files
+#	clobber			make clean, and remove ftnchek executable
+#	dcl2inc.doc		ASCII form of documentation
+#	dcl2inc.ps		PostScript form of documentation
+#	dcl2inc.sh		Shell script to convert decls to includes
+#	distclean		remove everything not in the distribution
+#	docs			documentation files
+#	fortran.c		translate yacc code to C
+#	ftnchek			ftnchek executable program
+#	ftnchek.1		UNIX manual page document
+#	ftnchek.doc		ASCII form of documentation
+#	ftnchek.hlp		VAX/VMS HELP library source
+#	ftnchek.ps		PostScript form of documentation
+#	install			install ftnchek and dcl2inc and their man pages
+#	install-exe		install ftnchek and dcl2inc executables
+#	install-man		install only man pages
+#	install-man-sgi		install only man pages on SGI systems
+#	lint			run lint on source code
+#	mostlyclean		same as clean
+#	prog			same as ftnchek
+#	realclean		same as clobber
+#	spotless		make distclean, then remove formatted
+#				documentation (do NOT do this if you don't
+#				have groff or nroff/troff to recreate the
+#				documentation!)
+#	maintainer-clean	distclean, then things maintainer can rebuild
+#	TAGS			emacs editor tags file
+#	tags			ex and vi editor tags file
+#	uninstall		undo an ftnchek installation
+#	tar			distribution tar file
+#
+# Object file targets:
+#	ftnchek.o
+#	exprtype.o
+#	forlex.o
+#	fortran.o
+#	pgsymtab.o
+#	plsymtab.o
+#	project.o
+#	symtab.o
+#
+#
+#
+#    Copyright (C) 1991 by Robert K. Moniot.
+#    This program is free software.  Permission is granted to
+#    modify it and/or redistribute it, retaining this notice.
+#    No guarantees accompany this software.
+#
+# Acknowledgements and thanks to Nelson H. F. Beebe of the University
+# of Utah for improvements to this Makefile.
+# [25-Apr-1994]
+#=======================================================================
+
+# These definitions should be customized for your local conventions
+# if you want to do "make install" or "make uninstall".
+#  PREFIX is the root of the destination for installing things.
+#  BINDIR is directory for executables, MANDIR for man pages.
+#  MANEXT is the extension on man pages, including the dot.
+#  LIBDIR is the directory for library files (dcl2inc.awk)
+PREFIX		= /usr/local
+EXEC_PREFIX	= $(PREFIX)
+BINDIR		= $(EXEC_PREFIX)/bin
+MANDIR		= $(PREFIX)/man
+MANEXT		= .1
+LIBDIR		= $(PREFIX)/lib/ftnchek
+
+# The following definitions are set for your system by configure
+CC              = cc
+MANtoPS		= groff -man
+NAWK		= gawk
+NROFF		= nroff
+SED		= sed
+STRIP           = strip
+YACC            = bison -y
+
+# The following is only used for targets ftnchek.doc and ftnchek.hlp
+# which are not needed for unix platforms.  It removes control chars
+# and converts tabs to blanks.  Normally COL=col -bx
+COL		= col -bx
+
+# Editor tags file support
+CTAGS		= ctags
+CTAGSFLAGS	= -t
+ETAGS		= etags
+
+
+# These system utilities should be standard on all UNIX systems
+CHMOD		= chmod
+CMP		= cmp
+CP              = cp
+EQN		= eqn
+MKDIR		= mkdir
+MV              = mv
+RM              = rm -f
+RMDIR		= rmdir
+SHELL		= sh
+SOELIM		= soelim
+TBL		= tbl
+TAR		= tar
+
+FTNCHEK		= ./ftnchek
+MAN2PS		= ./man2ps
+
+
+# OPTIONS is used to define various characteristics.  Most commonly
+# needed ones are given below; uncomment whichever you like.
+# See ftnchek.h for others, with their defaults and explanations.
+# OPTIONS shouldn't include things controlled by "configure".
+# To include your own options without touching the Makefile, say
+#              make "OPTIONS= <your-list-of-options>"
+
+#  To prohibit underscores in variable names, inline comments starting
+#  with '!',  the DO ... ENDDO loop forms and INCLUDE statements:
+#OPTIONS        = -DSTRICT_SYNTAX
+
+
+# CFLAGS is used to define the operating system and options
+# LDFLAGS gives linker options
+# YFLAGS specifies yacc options
+CFLAGS          = -DUNIX -DLARGE_MACHINE -D_BSD -O  $(OPTIONS)
+LDFLAGS         =
+YFLAGS          = -d
+
+# fortran.o first because of possible remake if tokdefs.h changes (see below)
+OBJS            = fortran.o exprtype.o forlex.o ftnchek.o \
+		  pgsymtab.o plsymtab.o project.o symtab.o
+
+DOCS		= README INSTALL PATCHES average.f average.out correct.f \
+			blurb.txt dcl2inc.doc dcl2inc.man dcl2inc.ps \
+			ftnchek.doc ftnchek.hlp ftnchek.man ftnchek.ps
+BUILDFILES	= Makefile.in configure configure.in config.guess config.sub \
+			makefile.bc makefile.mpw makefile.os2 makefile.unix \
+			makefile.generic \
+			install-sh ftnchek.def \
+			build-alpha.com build.com cc.com \
+			link-alpha.com link.com
+SRCS            = exprtype.c forlex.c fortran.y fortran.c ftnchek.c \
+		  ftnchek.h intrins.h iokeywds.h keywords.h \
+		  pgsymtab.c plsymtab.c project.c shell_mung.c \
+		  symtab.c symtab.h tokdefs.h
+SCRIPTS		= dcl2inc.awk dcl2inc.sh.in man2ps
+TESTDIR		= test
+# The following defines all files to go into distribution
+DISTFILES	= $(DOCS) $(BUILDFILES) $(SRCS) $(SCRIPTS) $(TESTDIR)
+#=======================================================================
+
+prog:	ftnchek dcl2inc.sh
+
+all:	ftnchek dcl2inc.sh docs
+
+check:
+	cd test; $(MAKE) NAWK="$(NAWK)" -s precheck
+	cd test; $(MAKE) NAWK="$(NAWK)" -i -s check
+
+lint:
+	lint $(LINTFLAGS) $(OBJS:.o=.c) -lm
+
+# Remove intermediate files that are not required after the program is
+# built.
+clean mostlyclean:
+	-$(RM) *.o
+	-$(RM) \#*
+	-$(RM) a.out
+	-$(RM) *~
+	-$(RM) core
+	-$(RM) y.tab.h
+	-$(RM) config.status config.log config.cache
+
+# Remove almost everything that make can rebuild.  We do not remove
+# fortran.c since some places don't have yacc or bison.
+clobber realclean:	clean
+	-$(RM) ftnchek
+	-$(RM) dcl2inc.sh
+
+# Remove everything that make can rebuild, preparatory to making a
+# distribution version.  We intentionally do NOT remove .ps and .doc
+# files, because some UNIX systems lack nroff/troff/groff.
+distclean:	realclean
+	-$(RM) *.dcl
+	-$(RM) cscope.out
+	-$(RM) tags
+	-$(RM) TAGS
+	-$(RM) ftnchek$(MANEXT)
+	cd test; $(MAKE) distclean
+
+maintainer-clean:	distclean
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+	-$(RM) Makefile
+	-$(RM) configure
+	-$(RM) fortran.c
+
+ftnchek: $(OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o ftnchek $(OBJS) -lm
+
+# N.B. tokdefs.h is copy of y.tab.h used to avoid remaking stuff when
+# grammar changes but not tokens.
+# The following copies y.tab.h to tokdefs.h if changed, then aborts make,
+# since dependencies may have changed.
+fortran.c: fortran.y
+	$(YACC) $(YFLAGS) fortran.y
+	$(MV) y.tab.c fortran.c
+	@if $(CMP) -s y.tab.h tokdefs.h ; then true ; else \
+		echo; echo tokdefs.h changed -- repeat make ; \
+		$(CP) y.tab.h tokdefs.h; \
+		false ; \
+	fi
+
+# Build dcl2inc.sh using the local values for NAWK and LIBDIR.
+dcl2inc.sh: dcl2inc.sh.in Makefile
+	$(CP) dcl2inc.sh.in dcl2inc.sh
+	echo '$(NAWK) -f $(LIBDIR)/dcl2inc.awk $$*' >> dcl2inc.sh
+	$(CHMOD) +x dcl2inc.sh
+
+# Documentation targets: If you make changes to the documentation,
+# you should edit only ftnchek.man and then re-make these targets.
+# If ftnchek.1 fails to make, ftnchek.man is usable directly (after
+# applying soelim) except that some troff-like processors may not
+# give satisfactory results.
+
+docs:	average.out blurb.txt ftnchek.doc ftnchek.hlp \
+	ftnchek.ps dcl2inc.doc dcl2inc.ps
+
+
+# Following sed script trims out the if-else machinery contained in
+# ftnchek.man to produce a clean nroff document.  The lines of the
+# sed script correspond to the following actions:
+#	1. remove text between lines of form ``.if \nh \{'' or .ie \nh \{''
+#	   and lines of form ``\}'' (these are the help-related additions)
+#	2. remove lines of form ``.if !\nh \{''  (these preface man text)
+#	   Also remove ``.if !\nb \{'' which are for blurb.
+#	3. remove lines of form ``.el \{''  (start of the else sections of
+#	   the .if's of step 1)
+#	4. remove lines of form ``\}'' (closures of step 3 lines)
+#	5. remove lines of form ``.ie \nh text'' (one-liner help text)
+#	6. change lines of form ``.el \nh text'' to ``text'' (these are
+#	   one-liner man text)
+#	7. change lines of form ``.if !\nh text'' to ``text'' (ditto)
+ftnchek$(MANEXT):	ftnchek.man average.f average.out correct.f
+	$(SOELIM) ftnchek.man | \
+	$(SED) -e '/^\.i[fe] \\nh \\{/,/^\\}$$/d' \
+	    -e '/^\.if !\\n[bh] \\{/d' \
+	    -e '/^\.el \\{/d' \
+	    -e '/^\\}/d' \
+	    -e '/^\.i[fe] \\nh /d' \
+	    -e 's/^\.el *\(.*\)$$/\1/' \
+	    -e 's/^\.if !\\nh *\(.*\)$$/\1/' \
+			> ftnchek$(MANEXT)
+
+# ftnchek.doc is ascii text form of documentation.  It should not matter
+# whether ftnchek.1 or ftnchek.man is used here.
+ftnchek.doc:	ftnchek.man
+	$(NROFF) -man ftnchek.man | $(COL) >ftnchek.doc
+
+# ftnchek.ps is PostScript form of documentation.
+ftnchek.ps:	ftnchek$(MANEXT)
+	$(TBL) <ftnchek$(MANEXT) | $(EQN) | $(MANtoPS) >ftnchek.ps
+
+# blurb.txt is an ascii file for informational mailings.
+blurb.txt:	ftnchek.man
+	$(NROFF) -man -rb1 ftnchek.man | $(COL) >blurb.txt
+
+# ftnchek.hlp is a VMS HELP library source document:
+# create ftnchek.hlb with $ LIBR/CREATE/HELP FTNCHEK.HLB FTNCHEK.HLP
+# The leading and trailing newlines in ftnchek.hlp should be removed.
+ftnchek.hlp:	ftnchek.man
+	$(SED) -e '1d' ftnchek.man | \
+	$(NROFF) -man -rh1 | $(COL) | \
+	$(SED) -e 's/^-\([a-zA-Z][a-zA-Z]*\)/\/\1/' \
+	    -e 's/\([^a-zA-Z]\)-\([a-zA-Z][a-zA-Z]*\)/\1\/\2/g' \
+	>ftnchek.hlp
+
+
+# Rebuild average.out when version changes.  (We don't put the
+# dependency on ftnchek to avoid building ftnchek just for docs.)
+average.out: ftnchek.h
+	$(FTNCHEK) -list -symtab average > average.out
+
+# dcl2inc.doc is ascii text form of documentation.  It should not matter
+# whether dcl2inc.1 or dcl2inc.man is used here.
+dcl2inc.doc:	dcl2inc.man
+	$(NROFF) -man dcl2inc.man | $(COL) >dcl2inc.doc
+
+dcl2inc.ps:	dcl2inc.man
+	$(TBL) <dcl2inc.man  | $(EQN) | $(MAN2PS) >dcl2inc.ps
+
+
+# Install program and documentation on system.  Obsolete fcl2vcg script
+# & doc is removed if present.
+install:	install-exe install-man
+
+install-exe:	ftnchek dcl2inc.sh
+	$(CP) ftnchek $(BINDIR)
+	-$(STRIP) $(BINDIR)/ftnchek
+	$(CHMOD) 755 $(BINDIR)/ftnchek
+	-$(MKDIR) $(LIBDIR)
+	$(CP) dcl2inc.awk $(LIBDIR)/dcl2inc.awk
+	$(CHMOD) 644 $(LIBDIR)/dcl2inc.awk
+	$(CP) dcl2inc.sh $(BINDIR)/dcl2inc
+	$(CHMOD) 755 $(BINDIR)/dcl2inc
+	-$(RM) $(BINDIR)/fcl2vcg
+
+# Install man pages, taking care to remove old formatted ones, because
+# many man implentations fail to compare time stamps of raw and
+# formatted files, and will show out-of-date formatted files.
+install-man: ftnchek$(MANEXT)
+	$(CP) dcl2inc.man $(MANDIR)/man1/dcl2inc$(MANEXT)
+	-$(RM) $(MANDIR)/cat1/dcl2inc$(MANEXT)
+	$(CHMOD) 644 $(MANDIR)/man1/dcl2inc$(MANEXT)
+	$(CP) ftnchek$(MANEXT) $(MANDIR)/man1/ftnchek$(MANEXT)
+	-$(RM) $(MANDIR)/cat1/ftnchek$(MANEXT)
+	$(CHMOD) 644 $(MANDIR)/man1/ftnchek$(MANEXT)
+	-$(RM) $(MANDIR)/man1/fcl2vcg$(MANEXT)
+	-$(RM) $(MANDIR)/cat1/fcl2vcg$(MANEXT)
+
+# IRIX uses pre-formatted, packed man pages and nroff is not bundled with it.
+# If this IRIX does not have nroff, then use the flat ascii files as
+# second best.
+install-man-sgi:
+	if true ; then \
+	  $(NROFF) -man dcl2inc.man > dcl2inc.cat ; \
+	else \
+          cp dcl2inc.doc dcl2inc.cat ; \
+	fi ; \
+	if pack dcl2inc.cat ; \
+	then \
+		$(MV) dcl2inc.cat.z $(MANDIR)/dcl2inc.z ; \
+		$(CHMOD) 644 $(MANDIR)/dcl2inc.z ; \
+	fi
+	if true ; then \
+	  $(NROFF) -man ftnchek.man > ftnchek.cat ; \
+	else \
+          cp ftnchek.doc ftnchek.cat ; \
+	fi ; \
+	if pack ftnchek.cat ; \
+	then \
+		$(MV) ftnchek.cat.z $(MANDIR)/ftnchek.z ; \
+		$(CHMOD) 644 $(MANDIR)/ftnchek.z ; \
+	fi
+	-$(RM) $(MANDIR)/fcl2vcg.z
+
+# Remove everything that the install target installed.
+uninstall:
+	-$(RM) $(BINDIR)/dcl2inc
+	-$(RM) $(BINDIR)/ftnchek
+	-$(RM) $(LIBDIR)/dcl2inc.awk
+	-$(RM) $(MANDIR)/cat1/dcl2inc$(MANEXT)
+	-$(RM) $(MANDIR)/cat1/ftnchek$(MANEXT)
+	-$(RM) $(MANDIR)/ftnchek.z	# SGI
+	-$(RM) $(MANDIR)/man1/dcl2inc$(MANEXT)
+	-$(RM) $(MANDIR)/man1/ftnchek$(MANEXT)
+	-$(RMDIR) $(LIBDIR)
+
+# WARNING: do NOT execute this target, unless you have nroff/troff or groff
+# to recreate the formatted documentation files.
+spotless:	distclean
+	$(RM) blurb.txt
+	$(RM) dcl2inc.doc
+	$(RM) dcl2inc.ps
+	$(RM) ftnchek.doc
+	$(RM) ftnchek.hlp
+	$(RM) ftnchek.ps
+
+# ex and vi editor tags file
+tags:	$(SRCS)
+	$(CTAGS) $(CTAGSFLAGS) *.[ch]
+
+# emacs editor tags file
+TAGS:	$(SRCS)
+	$(ETAGS) *.[ch]
+
+#=======================================================================
+# Object file dependencies on include files
+
+ftnchek.o:	ftnchek.h
+
+exprtype.o:	ftnchek.h symtab.h tokdefs.h
+
+forlex.o:	ftnchek.h keywords.h symtab.h tokdefs.h
+
+fortran.o:	ftnchek.h symtab.h fortran.c
+
+pgsymtab.o:	ftnchek.h symtab.h
+
+plsymtab.o:	ftnchek.h symtab.h
+
+project.o:	ftnchek.h symtab.h
+
+symtab.o:	ftnchek.h iokeywds.h intrins.h symtab.h tokdefs.h
+
+
+#=======================================================================
+# The makefile.generic target is for users on deficient Unix systems or using
+# GNU software on non-Unix platforms.  It tries to put reasonably generic
+# values in for all the things that the configure script is supposed to
+# handle.  Pathnames are removed since these may vary wildly.
+# The first sed substitution is to protect the patterns from configure.
+# It is not protected from itself, so this target will look (and be)
+# wrong in makefile.generic.
+makefile.generic: Makefile.in
+	sed -e 's/@\([A-Za-z_][A-Za-z_]*\)@/~\1~/' \
+	    -e 's%cc%cc%' \
+	    -e 's%groff -man%groff -man%' \
+	    -e 's%gawk%gawk%' \
+	    -e 's%nroff%nroff%' \
+	    -e 's%sed%sed%' \
+	    -e 's%strip%strip%' \
+	    -e 's%bison -y%bison -y%' \
+	    -e 's%col -bx%col -bx%' \
+	    -e 's%-DUNIX -DLARGE_MACHINE -D_BSD -O %-DUNIX -DLARGE_MACHINE -D_BSD -O $(OPTIONS)%' \
+	    -e 's%install-man%install-man%' \
+	    -e 's%true%true%' \
+	    -e 's% % %' \
+	    -e 's% % %' \
+		Makefile.in > makefile.generic
+
+#=======================================================================
+# Making the distribution tar file.  Dirname is name of current
+# directory.  Makefiles are not distributed because they are supposed
+# to be created by local configure.  Files to archive are explicitly
+# named so that detritus from development will not be accidentally
+# included.  However, test files are not listed separately so one
+# should make clean in test/ first.
+#
+# This target assumes GNU tar for the --exclude option.  If you don't
+# have it, remove test/Makefile manually and use ``make tar TAR_EXCLUDE=''
+
+TAR_EXCLUDE	= --exclude $$dirname/test/Makefile
+
+tar:
+	dirname=`pwd|$(SED) 's@.*/@@'` ; cd .. ; \
+	  $(TAR) -cf $$dirname.tar $(TAR_EXCLUDE) \
+	  `echo " "$(DISTFILES) | sed "s@ @ $$dirname/@g"`
+
+# Targets that should be freshened prior to making tar (so I don't put
+# stale ones into the distribution).
+pretar:	docs makefile.generic distclean

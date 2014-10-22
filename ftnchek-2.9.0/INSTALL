@@ -1,0 +1,165 @@
+			  INSTALLING FTNCHEK
+
+To install ftnchek, follow the instructions below for your operating
+system.  If you wish, you may refer to the README file, in the section
+``CUSTOMIZING'' for options that allow compiling with bigger table
+sizes or accepting/rejecting certain syntax extensions.  However, the
+default compilation options are generally satisfactory.
+
+
+(1) UNIX and UNIX-like systems
+
+Configure a Makefile for your system with the command:
+
+        $ ./configure
+
+This uses the file Makefile.in as a template.  If you want to change
+some options, edit the file Makefile.in, not Makefile, and re-run
+configure.
+
+Next, build ftnchek with the command:
+
+	$ make
+
+To verify correct operation of the newly created ftnchek, you can
+now issue the command
+
+	$ make check
+
+This will run ftnchek on the suite of test programs in the
+subdirectory ``test'' and report on any discrepancies.
+
+Once ftnchek is working properly, issue the command (requiring
+super-user authority):
+
+	$ make install
+
+This will install the executable in /usr/local/bin and the manpage in
+/usr/local/man by default.  (On SGI the manpage gets specialized
+treatment--see the makefile.)  If you do not wish to install the
+manpage but only the executable, use instead
+
+	$ make install-exe
+
+
+
+(2a) VMS on DEC VAX
+
+   Give the command
+
+        $ @BUILD
+
+   After the program has been compiled, you must turn it into a
+   so-called "DCL foreign command" so that it can be invoked by
+   giving its name on a command line, instead of using the RUN
+   command.  Do this with the command
+
+        $ FTNCHEK :== $disk:[directory]FTNCHEK
+
+   where you substitute the disk and directory names where the file
+   FTNCHEK.EXE resides.  This command must be executed once per
+   login.  It is suggested you put this command into your LOGIN.COM
+   file.
+
+   The BUILD procedure also creates a VMS help library named
+   FTNCHEK.HLB.  To access it from the VMS HELP command, you must
+   give the command
+
+        $ DEFINE HLP$LIBRARY disk:[directory]FTNCHEK.HLB"
+
+   Again, this command must be executed once per login to have effect.
+
+   Note that BUILD.COM uses the files CC.COM and LINK.COM which are
+   conditional compilation and link scripts that allow re-making
+   ftnchek by compiling only what has changed.
+
+(2b) VMS on DEC ALPHA
+
+   Same as (2a) except use BUILD-ALPHA.COM instead.
+
+
+(3) MS-DOS with Borland C
+
+   Rename the file "makefile.bc" to "makefile" and then give the
+   command:
+
+        C> MAKE
+
+   Note: This makefile has not been updated lately and may not work
+   with recent releases of Borland C.  I only have an old version of
+   this compiler.  Also, ftnchek version 2.9 has a large appetite for
+   dynamically allocated memory.  This means that 16-bit 80x86 code,
+   which is limited to 64KB data segments, will soon run out of memory
+   when analyzing moderate-sized programs.  Therefore it is best to
+   compile ftnchek to 32-bit code.  I hear that Borland C now supports
+   32-bit code, but I have not been able to update the makefile to
+   take advantage of it.  I would welcome the contribution of an
+   updated version of makefile.bc.
+
+
+(4) Macintosh Programmer's Workshop (MPW)
+
+   Rename the file "makefile.mpw" to "makefile".  Edit the file,
+   changing character '+' to CHAR(182), option-d on the Macintosh
+   keyboard; and the character '/' to CHAR(196), option-f.  Then
+   use the "make" command to create Ftnchek.
+
+
+(5) OS/2 with gcc
+
+   Rename the file "makefile.os2" to "makefile" and then run make.
+
+
+(6a) Other systems having "make" utility
+
+   Rename the file "makefile.generic" to "makefile", edit it
+   appropriately for your system, and run make.
+
+
+(6b) Other systems not having "make" utility
+
+   It should suffice simply to compile all the ".c" files (omitting
+   shell_mung.c -- it is only for VMS) and link them.  The only
+   differences among the versions for different operating systems have
+   to do with:
+         -- the use of "/" vs. "-" as a command-line option prefix.
+            Define the macro name OPTION_PREFIX_SLASH if "/" is to be
+            accepted as an alternate to "-".  (No particular value
+            need be assigned to this macro, just define it.)  The "-"
+            prefix is always accepted.  NOTE: do not define this macro
+            if your system uses the "/" character as a delimiter in
+            path names.  Doing so will introduce ambiguities in the
+            command-line arguments.
+         -- the default filename extension ".for" vs. ".f".  Define
+            the macro name DEF_SRC_EXTENSION to the string value
+            corresponding to Fortran source files on your system.
+         -- the default home directory in which to search for
+            .ftnchekrc or ftnchek.ini.  Define SPECIAL_HOMEDIR to the
+            string value appropriate for your system.
+         -- the default systemwide directory in which to search for
+            include-files.  Define the macro DEFAULT_INCLUDE_DIR to
+            the string value of this directory.
+   These macros are all defined automatically to appropriate values
+   for Unix, VMS, and MSDOS systems.  You only need to define them by
+   hand if compiling ftnchek on other systems.
+
+   If your compiler does not accept modern C syntax for function
+   prototypes, define the macro NO_PROTOTYPES.
+
+
+Once ftnchek is working, you can test it by giving the command:
+
+        $ ftnchek -list -sym average
+
+Then compare the output against the file ``average.out''.  A more
+thorough checkout is possible on Unix systems by giving the ``make
+check'' command described above.
+
+
+It has been reported that ftnchek gives parse errors on file average.f
+on a Cray Y-MP running UNICOS 8.0 3.0 and SCC 4.0.1. This can be
+worked around by creating a new version of fortran.c from fortran.y
+using yacc (not bison) on another platform (e.g. IBM/RS6000; the Cray
+yacc gave up).  The command to do this is ``rm fortran.c; make
+fortran.c''.  Use this version of fortran.c to build ftnchek on the
+Cray.

@@ -1,0 +1,9 @@
+# ftnchek-2.9
+# This is just a dummy install-sh to make the autoconf macro
+# AC_CANONICAL_HOST happy. It's supposed to be a substitute
+# for systems that don't have an "install" command. I think.
+#
+# Since install isn't used, and there's an install procedure in 
+# the Makefile, just leave this as a dummy file. But maybe later
+# simplify the Makefile, and use the install-sh provided with 
+# autoconf.
